@@ -38,15 +38,6 @@
     <rect x="0" y="342" width="1280" height="78" fill="url(#sea)"/>
     <path d="M0 352 C 80 340, 160 364, 240 352 S 400 340, 480 352 S 640 364, 720 352 S 880 340, 960 352 S 1120 364, 1280 352" fill="none" stroke="#14F195" stroke-width="2.5" opacity="0.7"/>
     <path d="M0 376 C 80 364, 160 388, 240 376 S 400 364, 480 376 S 640 388, 720 376 S 880 364, 960 376 S 1120 388, 1280 376" fill="none" stroke="#9945FF" stroke-width="2" opacity="0.55"/>
-    <!-- chain of tokens -->
-    <g transform="translate(700 288)" opacity="0.95">
-      <g stroke="url(#sol)" stroke-width="5" fill="none">
-        <rect x="0" y="0" width="64" height="36" rx="18"/>
-        <rect x="46" y="0" width="64" height="36" rx="18"/>
-        <rect x="92" y="0" width="64" height="36" rx="18"/>
-        <rect x="138" y="0" width="64" height="36" rx="18"/>
-      </g>
-    </g>
     <!-- wordmark -->
     <text x="72" y="168" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="92" font-weight="800" fill="#ffffff" letter-spacing="-2">Cachain</text>
     <rect x="76" y="186" width="210" height="6" rx="3" fill="url(#sol)"/>

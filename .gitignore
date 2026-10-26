@@ -31,3 +31,4 @@ dist/
 /tests/fixtures/*.so
 /tests/fixtures/squads-program-config.json
 /app/public/localnet.json
+/.devnet/

@@ -17,6 +17,7 @@
     "test": "vitest run",
     "test:e2e": "vitest run --config vitest.e2e.config.ts",
     "gate": "bash scripts/gate.sh",
+    "devnet:seed": "tsx scripts/devnet.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p app/tsconfig.json",
     "app": "vite --config app/vite.config.ts"
   },

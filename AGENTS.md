@@ -134,7 +134,7 @@ extracts the code from any Kit error; `describeError(code)` names it.
 | 6041 | NoHolders | Income can be recorded only after the first tokens are issued. |
 | 17 | Token-2022 AccountFrozen | The recipient is not a verified member. |
 | 2000–2999 | Anchor constraint errors | A wrong account was passed (client bug). |
-| 6004–6010 from SQDS4… | Squads errors | e.g. 6008 InvalidProposalStatus: the proposal needs more approvals. |
+| 6000+ from Squads | Squads errors | e.g. 6008 InvalidProposalStatus: the proposal needs more approvals; 6005 NotAMember. Check which program failed before naming the error. |
 
 ## Read-only data guide
 

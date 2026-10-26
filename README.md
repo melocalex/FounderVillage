@@ -202,7 +202,7 @@ fee; it comes back when the account closes.
 
 | Item | Size | Rent |
 |---|---|---|
-| Program data (current binary) | 575,533 B | 2.92 SOL |
+| Program data (current binary) | 575,405 B | 2.92 SOL |
 | `Asset` | 477 B | 0.0031 SOL |
 | `Bounty` | 303 B | 0.0022 SOL |
 | `Position` | 113 B | 0.0012 SOL |

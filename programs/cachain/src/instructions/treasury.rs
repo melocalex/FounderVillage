@@ -38,7 +38,7 @@ pub struct RecordInflow<'info> {
 }
 
 /// Rent or revenue arrives. Anyone may pay it in (the operating company, in practice); it mints
-/// nothing and raises every profit holder's claim pro rata.
+/// nothing and raises every profit holder's claim pro rata. Refused before the first issuance.
 pub fn record_inflow(mut ctx: Context<RecordInflow>, amount: u64) -> Result<()> {
     require!(amount > 0, CachainError::ZeroAmount);
     let a = &mut ctx.accounts;

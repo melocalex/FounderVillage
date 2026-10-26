@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- Live on devnet. `npm run devnet:seed` seeds the Founder Haus scenario and writes `docs/devnet.md`;
+  `npm run devnet:onboard -- <wallet>` whitelists a tester and mints 10,000 test USDC.
+- CI: the formatter config is now in the repository, so the generated client is identical on
+  every machine and the drift check passes on GitHub.
+- `docs/ENGINEERING.md`: the distribution proofs, overflow bounds, measured compute units of all
+  22 instructions, the pinned toolchain and the review log.
+- `ia/`: developer context and an implementation guide for AI agents; AGENTS.md adds working and
+  writing rules (Karpathy, ASD-STE100) and how to get test tokens.
+- Docs follow the 26 Oct deck: each asset company is an SPV (an SPE in Brazil).
+
 ## 0.1.0 — 2026-10-26
 
 First working version, on localnet.

@@ -232,7 +232,7 @@ export function App() {
 
         <main className="col main">
           <section className="stats">
-            <Stat label="Capital raised" value={`${fmt(a.ledger.contributed)} USDC`} hint={`vault ${fmt(vaults.capital)} · sent to SPE ${fmt(a.ledger.outflow)}`} />
+            <Stat label="Capital raised" value={`${fmt(a.ledger.contributed)} USDC`} hint={`vault ${fmt(vaults.capital)} · sent to SPV ${fmt(a.ledger.outflow)}`} />
             <Stat label="Rent recorded" value={`${fmt(a.ledger.income)} USDC`} hint={`claimed ${fmt(a.ledger.incomeClaimed)} · vault ${fmt(vaults.income)}`} />
             <Stat label="Profit tokens tracked" value={fmt(a.distribution.trackedSupply)} hint={`reward index ${a.distribution.rewardIndex.toString()}`} />
             <Stat label="Holding share" value={`${a.holdingBps / 100}%`} hint="of every issuance" />

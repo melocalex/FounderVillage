@@ -1,11 +1,38 @@
 # AGENTS.md
 
-Cachain puts a Founder Village asset (an SPE that owns a building) on Solana. Each asset has two
+Cachain puts a Founder Village asset (an SPV, in Brazil an SPE, that owns a building) on Solana. Each asset has two
 Token-2022 tokens, **ownership** and **profit**, whose accounts are born frozen: only wallets with a
 live Solana Attestation Service attestation get thawed. Tokens are minted only through **bounties**:
 a financial bounty mints as USDC arrives, a work bounty mints when the council accepts the delivery.
 Rent paid in with `record_inflow` is claimable pro rata by profit holders. The council is a 2-of-3
 Squads vault.
+
+## Read first
+
+1. [ia/DEVELOPER_CONTEXT.md](ia/DEVELOPER_CONTEXT.md) gives the facts: actors, accounts, states, whitelist, rent, clusters, test tokens.
+2. [ia/IMPLEMENTATION_GUIDE.md](ia/IMPLEMENTATION_GUIDE.md) gives the order of work. Do one step per session. Finish each step with its proof.
+3. This file gives the rules, the instructions, the errors and the data guide.
+
+## How to work
+
+These rules come from Andrej Karpathy's guidelines for coding agents.
+
+1. **Think before you code.** Write your assumptions. If a request has two meanings, show both and ask. If something is not clear, stop and name it.
+2. **Keep it simple.** Write the minimum code that solves the request. Add no feature, abstraction or option that nobody asked for.
+3. **Change only what you must.** Do not refactor, reformat or "improve" code next to your change. Match the style of the file. Remove only the code that your change made unused.
+4. **Prove the result.** Before you start, write how you will check the result. Loop until the check passes. A screen, a transaction signature or an error code is proof. "It compiles" is not proof.
+
+## How to write
+
+Write docs, comments, commit messages and UI text in ASD-STE100 Simplified Technical English.
+
+1. Use a maximum of 20 words in a sentence. Use a maximum of 6 sentences in a paragraph.
+2. Write one idea in a sentence.
+3. Use the active voice: "The council accepts the work", not "The work is accepted".
+4. Use one word for one meaning. Use the same word each time: "whitelist", "bounty", "tranche", "council", "rent". Do not use synonyms.
+5. Use simple, common words. Write "use", not "utilize". Write "start", not "initiate".
+6. Write instructions as commands: "Send the transaction", not "You should send the transaction".
+7. Write no claim about return, yield or profit for investors.
 
 ## Run it
 
@@ -39,7 +66,7 @@ tranche with one contribution, an open work bounty, and one claimable distributi
 | Cluster | Cachain | Notes |
 |---|---|---|
 | localnet | `CachxfgQfNcVhvjGGY5KMTSijdP8SVx4MqDxDniyQP6S` | deployed by `npm run dev` |
-| devnet | `CachxfgQfNcVhvjGGY5KMTSijdP8SVx4MqDxDniyQP6S` | **not deployed yet** |
+| devnet | `CachxfgQfNcVhvjGGY5KMTSijdP8SVx4MqDxDniyQP6S` | deployed; demo asset and every address in [docs/devnet.md](docs/devnet.md) |
 | mainnet | none | not deployed; needs an audit first |
 
 External: SAS `22zoJMtdu4tQc2PzL74ZUT7FrwgB1Udec8DdW4yw4BdG`, Squads v4 `SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf`, Token-2022 `TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb`.
@@ -71,7 +98,7 @@ second approves, any member executes).
 | `accept_delivery`, `reject_delivery` | council | work bounty |
 | `settle_work` | anyone | mints the curated reward to the claimant |
 | `record_inflow` | payer of the rent | USDC into the income vault; raises every profit holder's claim (refused before the first issuance) |
-| `record_outflow` | council | capital to the pinned SPE treasury |
+| `record_outflow` | council | capital to the pinned SPV treasury |
 | `claim_distribution` | eligible holder | pays accrued income |
 | `execute` | Token-2022 only | transfer hook of the profit mint; never call it |
 
@@ -147,7 +174,7 @@ extracts the code from any Kit error; `describeError(code)` names it.
 | 6033 | EmptyDelivery | Attach the delivery. |
 | 6034 | NothingToClaim | Nothing to claim yet. |
 | 6035 | ExceedsCapital | More than the recorded capital. |
-| 6036 | WrongTreasury | Capital can only go to the SPE treasury. |
+| 6036 | WrongTreasury | Capital can only go to the SPV treasury. |
 | 6037 | WrongVault | Wrong vault (client bug). |
 | 6038 | MathOverflow | Amount out of range. |
 | 6039 | NotTransferring | (never shown: hook misuse) |
@@ -171,6 +198,17 @@ extracts the code from any Kit error; `describeError(code)` names it.
 | Activity feed | `#[event_cpi]` events in inner instructions; decode with `identifyCachainEvent` | never parse logs |
 
 All amounts are `bigint` base units (6 decimals for USDC and both asset tokens). Format only at the edge.
+
+## Test tokens
+
+Use devnet for tests with a real wallet. Testnet does not work: the Attestation Service is not deployed on testnet.
+
+1. **Create a wallet.** Install Phantom, Solflare or Backpack. Set the network to devnet. Or run `solana-keygen new`, then `solana config set --url devnet`.
+2. **Get devnet SOL for fees.** Run `solana airdrop 2`. If the airdrop fails, use <https://faucet.solana.com>: choose devnet and sign in with GitHub for a higher limit.
+3. **Get test USDC and a whitelist attestation.** Send your wallet address to the maintainer. The maintainer runs `npm run devnet:onboard -- <your wallet>` on the machine that holds `.devnet/seed`. Your wallet gets 10,000 test USDC and an attestation.
+4. **Join the asset.** Send `joinInstructions` from your wallet. The program thaws your two token accounts.
+
+On localnet you need nothing: `npm run dev` funds and attests the demo wallets. The test USDC is a separate mint with no value. Never ask a tester for a seed phrase or a private key: the address is enough.
 
 ## Environment
 

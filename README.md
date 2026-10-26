@@ -2,7 +2,7 @@
 <p align="center">
   <b>Members earn a Founder Village asset's tokens by delivering work or capital. Only whitelisted wallets can hold them, and rent paid into the asset is shared among holders on-chain.</b><br>
   <a href="docs/guide/01-run-it.md"><b>Start</b></a> · <a href="docs/CONTRACTS.md">How the contracts work</a> · <a href="docs/guide/00-new-to-solana.md">New to Solana</a> ·
-  <a href="AGENTS.md">Frontend handoff</a> · <a href="AGENTS.md#errors">Errors</a> · <a href="docs/DECISIONS.md">Decisions</a>
+  <a href="AGENTS.md">Frontend handoff</a> · <a href="AGENTS.md#errors">Errors</a> · <a href="docs/DECISIONS.md">Decisions</a> · <a href="docs/ENGINEERING.md">Engineering notes</a>
 </p>
 <p align="center">
   <a href="https://github.com/melocalex/cachain/actions/workflows/ci.yml"><img src="https://github.com/melocalex/cachain/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
@@ -15,11 +15,13 @@
 
 > **Cachain** is the on-chain protocol behind Founder Village, a curated community of founders in
 > Jurerê Internacional, Florianópolis, building its neighborhood one asset at a time and owning what
-> it builds. Each asset sits in its own SPE. Members deliver **work** or **capital** through
+> it builds. Each asset sits in its own SPV. Members deliver **work** or **capital** through
 > bounties and receive the asset's tokens only when the delivery is real. **Not technical?** Read
-> [How the contracts work](docs/CONTRACTS.md): one page, no code.
+> [How the contracts work](docs/CONTRACTS.md): one page, no code. **Very technical?** Read
+> [Engineering notes](docs/ENGINEERING.md): the distribution math and its proofs, overflow bounds,
+> measured compute per instruction, the pinned toolchain and the review history.
 
-## 🚀 Running in 3 steps
+## Running in 3 steps
 
 | You need | For |
 |---|---|
@@ -54,16 +56,17 @@ Saw `Local Founder Haus is up`? Open **http://localhost:5183** and, in the harne
 Something failed? Start at [Run it · If it fails](docs/guide/01-run-it.md#if-it-fails).
 
 > [!IMPORTANT]
-> **Status: a working protocol on localnet.** 49 tests pass, most of them against the real mainnet
+> **Status: a working protocol, live on devnet.** 49 tests pass, most of them against the real mainnet
 > binaries of the Solana Attestation Service and Squads, and an independent adversarial review's
-> findings are fixed or recorded as trade-offs. Not yet on devnet; no external audit. This is
+> findings are fixed or recorded as trade-offs. Every devnet address is in
+> [docs/devnet.md](docs/devnet.md). No external audit yet. This is
 > software, not an offer: no token here is for sale, and neither the code nor its documentation
 > projects a return. [PROMPT.md](PROMPT.md), the engineering brief, quotes the offering's public
 > terms only as context for the engineer.
 
 <p align="center"><img src="assets/flow.svg" alt="Six steps: name a gap, curate, deliver, own it, operate, claim" width="100%"></p>
 
-## 🧭 The journey
+## The journey
 
 Never touched Solana? Guide 00 first. The rest: ~1 h 30 in total.
 
@@ -77,7 +80,7 @@ Never touched Solana? Guide 00 first. The rest: ~1 h 30 in total.
 | **05** | [Rent and claims](docs/guide/05-rent-and-claims.md) | rent split pro rata without any list of holders, claimed once | ~10 min |
 | **06** | [Going to devnet](docs/guide/06-going-to-devnet.md) | the program on devnet, visible in the explorer | ~30 min |
 
-## 🛡️ What the program guarantees
+## What the program guarantees
 
 | | Guarantee | How |
 |---|---|---|
@@ -86,7 +89,7 @@ Never touched Solana? Guide 00 first. The rest: ~1 h 30 in total.
 | **Nobody lists the holders** | Rent reaches every profit holder pro rata, with no snapshot, no Merkle root, and no authority stating who owns what. | An on-chain reward index plus a transfer hook that moves each holder's tracked balance with every transfer (burns are not tracked; see D9). Holders pull their share. |
 | **No single key decides** | Curation, acceptance, pausing and moving capital need two of three council members. | The council is a Squads v4 vault; one member's key is refused with `NotCouncil`. |
 
-## 🧩 Examples, one per flow
+## Examples, one per flow
 
 Every flow is a function in [`clients/ts/src/protocol.ts`](clients/ts/src/protocol.ts) built on the
 generated client, and every one is exercised by a test you can read top to bottom.
@@ -105,17 +108,17 @@ generated client, and every one is exercised by a test you can read top to botto
 > **Want the whole story in one file?** [`tests/e2e/full-flow.test.ts`](tests/e2e/full-flow.test.ts)
 > runs gap → bounty → funding → gate → work → rent → claim on Surfpool in about 70 lines.
 
-## 🏛️ Architecture
+## Architecture
 
 <p align="center"><img src="assets/architecture.svg" alt="Members, operator, council and issuer act on the Cachain program, which controls Token-2022 mints and USDC vaults and reads SAS attestations" width="100%"></p>
 
 | Account | Seeds | Holds |
 |---|---|---|
-| `Asset` | `["asset", creator, asset_id]` | policy numbers from `config/founder-haus.json`, council, holding, pinned SPE treasury, SAS credential and schema, the USDC ledger, the reward index, status |
+| `Asset` | `["asset", creator, asset_id]` | policy numbers from `config/founder-haus.json`, council, holding, pinned SPV treasury, SAS credential and schema, the USDC ledger, the reward index, status |
 | Ownership mint | `["mint", asset, 0]` | Token-2022: `DefaultAccountState = Frozen`, `TransferHook` (no program yet), `MetadataPointer` + `TokenMetadata`; mint and freeze authority = asset |
 | Profit mint | `["mint", asset, 1]` | same, with the transfer hook pointed at Cachain |
 | Hook account list | `["extra-account-metas", profit_mint]` | asset, plus the sender's and receiver's positions resolved from each token account's owner |
-| Capital vault | `["capital", asset]` | USDC from contributions; leaves only to the SPE treasury |
+| Capital vault | `["capital", asset]` | USDC from contributions; leaves only to the SPV treasury |
 | Income vault | `["income", asset]` | USDC from rent; leaves only as holders' claims |
 | `Bounty` | `["bounty", asset, id]` | kind, state, proposer, title, spec hash, terms, raised, claimant, delivery hash |
 | `Position` | `["position", asset, owner]` | the owner's profit balance, last index, accrued and claimed income |
@@ -151,7 +154,7 @@ next one.
 | Mint and freeze authority of both mints | the asset PDA | the asset PDA (the program); freeze can move to Token ACL with an upgrade |
 | Attestation issuer | a demo key | a Squads vault or a dedicated, rotated issuer |
 | Program upgrade authority | none (loaded by Surfpool) | a Squads multisig; immutability is a deliberate later decision |
-| SPE treasury (capital destination) | a demo USDC account, pinned at creation | the SPE's account |
+| SPV treasury (capital destination) | a demo USDC account, pinned at creation | the SPV's account |
 
 ### Parity with the EVM prior art
 
@@ -166,9 +169,9 @@ each is a deliberate change here:
 | The owner attests the holder snapshot for the initial allocation | The program tracks every profit balance; nobody attests holders |
 | The allowlist gates payment beneficiaries while transfers stay open | Holding is gated: accounts are born frozen and thawed only for attested wallets |
 | Two tokens: a fund claim and an income claim | Two tokens: ownership and profit |
-| "Notice delay" appears in no code | Squads `time_lock` enforces one (to be set before devnet; see [DECISIONS](docs/DECISIONS.md) O8) |
+| "Notice delay" appears in no code | Squads `time_lock` enforces one (to be set before mainnet; see [DECISIONS](docs/DECISIONS.md) O8) |
 
-## 🧪 Tests and the gate
+## Tests and the gate
 
 ```bash
 npm run gate             # everything CI runs, in order
@@ -199,16 +202,17 @@ holder can be revoked and frozen in one transaction. Every rejection asserts its
 Reviewed by an independent adversarial review; its two medium and one low findings are fixed with
 regression tests and its trade-offs recorded ([details](docs/DECISIONS.md#reviews)). CI also runs
 `cargo fmt`, `clippy -D warnings`, `anchor build`, the Codama drift check, `tsc` and `npm audit`,
-with actions pinned by commit SHA.
+with actions pinned by commit SHA. The proofs behind the property tests, the compute units of all 22
+instructions and the full review log are in [docs/ENGINEERING.md](docs/ENGINEERING.md).
 
-## 🤖 With an AI agent
+## With an AI agent
 
 1. **Hand it the rules.** [`AGENTS.md`](AGENTS.md) is one file: what the system is, the one command,
    every instruction with its signer, the error table with UI copy, and which accounts each screen reads.
 2. **One guide per session.** Point it at a guide in [`docs/guide/`](docs/guide/) and ask for that outcome only.
 3. **Ask for proof.** A passing `npm run gate` and what the harness shows count; "it compiles" does not.
 
-## 📦 What's here
+## What's here
 
 ```text
 cachain/
@@ -220,6 +224,9 @@ cachain/
 ├── docs/CONTRACTS.md      how the contracts work, for everyone
 ├── docs/guide/            the seven guides, 00 to 06
 ├── docs/DECISIONS.md      every design choice, its source, and what is still open
+├── docs/ENGINEERING.md    the math and its proofs, compute, toolchain, reviews
+├── docs/devnet.md         every devnet address, with explorer links
+├── ia/                    context and step-by-step guide for AI agents
 ├── config/                the policy numbers of each asset
 ├── idl/                   the Cachain IDL and the vendored Squads v4 IDL (MIT)
 ├── Dockerfile · docker-compose.yml   the pinned environment
@@ -227,7 +234,7 @@ cachain/
 └── PROMPT.md              the engineering brief this was built against
 ```
 
-## 💰 What going live costs
+## What going live costs
 
 Read live from mainnet on 2026-10-26, at 5,080 lamports per byte. Rent is a refundable bond, not a
 fee; it comes back when the account closes.
@@ -245,7 +252,7 @@ these is a **security audit**, which this program needs before it holds anyone's
 
 ## Limits, stated plainly
 
-Not built yet: devnet deployment, Mollusk compute benchmarks, Trident fuzzing, a verifiable build,
+Not built yet: Mollusk compute benchmarks, Trident fuzzing, a verifiable build,
 an asset-wide kill switch, and an external audit. Open questions for Founder Village and counsel,
 including whether the income stream must be separately transferable and how work bounties are
 taxed as compensation, are in [docs/DECISIONS.md](docs/DECISIONS.md).

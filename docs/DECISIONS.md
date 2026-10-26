@@ -2,11 +2,12 @@
 
 Every design choice, where it came from, and what was rejected. Dates are when the choice was made.
 "Open" items need an answer from Founder Village (and, where noted, counsel) before anything is
-deployed with real money.
+deployed with real money. The arithmetic proofs, measured costs and review log behind several
+of these choices are in [ENGINEERING.md](ENGINEERING.md).
 
 Sources, in order of precedence: Alex in the build conversation; the asset page
-`foundervillage.xyz/assets/founder-haus`; `foundervillage.xyz/docs`; the 22 Oct 2026 IslandDAO deck
-"Tokenizing a Neighborhood"; the Homerun EVM implementation (prior art only).
+`foundervillage.xyz/assets/founder-haus`; `foundervillage.xyz/docs`; the IslandDAO deck
+"Tokenizing a Neighborhood" (22 Oct 2026; revised 26 Oct, where each asset company is an SPV); the Homerun EVM implementation (prior art only).
 
 ## Answered
 
@@ -27,7 +28,7 @@ Sources, in order of precedence: Alex in the build conversation; the asset page
 | D13 | **The council is a Squads v4 multisig vault.** Curation, opening, pausing, closing, acceptance, rejection and outflows need it. Membership changes happen inside Squads, so the vault address, and the program, never change. | PROMPT §11.4 | A single admin key; an in-program council. |
 | D14 | **Every transition is its own instruction**; work settlement is permissionless because amount and recipient are already fixed. | PROMPT §10, §11.5 lesson 1 | Status flags in mutable config (Homerun). |
 | D15 | **Mint extensions:** `DefaultAccountState = Frozen`, `TransferHook` (profit mint points at Cachain; ownership mint keeps the extension with no program so per-transfer rules can be added), `MetadataPointer` + `TokenMetadata`. **Not enabled:** `PermanentDelegate`, `MintCloseAuthority`, `TransferFee`. | PROMPT §11.4 | A permanent delegate for court orders: irreversible, so it is a question for counsel before a mainnet mint (O5). |
-| D16 | **Capital leaves only to the SPE treasury account pinned at creation**, never more than recorded (`ExceedsCapital`). Stray transfers into a vault change no accounting. | PROMPT §11.4 | Outflow to any destination the council names. |
+| D16 | **Capital leaves only to the SPV treasury account pinned at creation**, never more than recorded (`ExceedsCapital`). Stray transfers into a vault change no accounting. | PROMPT §11.4 | Outflow to any destination the council names. |
 | D17 | **Transaction v1 everywhere** (Kit 8.5 plugin clients). The harness refuses wallets that cannot sign v1; the production frontend must keep a `version: 0` client for them. | PROMPT §5 | v0 by default. |
 | D18 | **Anchor 1.2.1 on the `solana-v3` crates**, Solana CLI 4.1.2. No Pinocchio: nothing measured asks for it. | Compatibility matrix | Anchor 2.0 RC (alpha); Pinocchio without a CU reason. |
 | D19 | **The local demo runs on an offline Surfpool** with the mainnet SAS and Squads binaries fetched read-only. | Determinism | A live mainnet fork: depends on the network and changes under you. |

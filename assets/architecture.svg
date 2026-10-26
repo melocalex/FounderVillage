@@ -36,7 +36,7 @@
     <text class="b"><tspan x="18" y="56">the company that runs the asset</tspan><tspan x="18" y="76">pays rent in, which raises every</tspan><tspan x="18" y="96">profit holder's claim</tspan></text></g>
   <g transform="translate(40 336)"><rect class="actor" width="270" height="104" rx="14" stroke="#FFB86B"/>
     <text x="18" y="32" class="h">Council · Squads 2-of-3</text>
-    <text class="b"><tspan x="18" y="56">its vault PDA is the only key that</tspan><tspan x="18" y="76">curates, accepts, pauses, closes</tspan><tspan x="18" y="96">and moves capital to the SPE</tspan></text></g>
+    <text class="b"><tspan x="18" y="56">its vault PDA is the only key that</tspan><tspan x="18" y="76">curates, accepts, pauses, closes</tspan><tspan x="18" y="96">and moves capital to the SPV</tspan></text></g>
   <g transform="translate(40 456)"><rect class="actor" width="270" height="104" rx="14"/>
     <text x="18" y="32" class="h">Issuer</text>
     <text class="b"><tspan x="18" y="56">attests members after off-chain</tspan><tspan x="18" y="76">KYC; stores a hash, never the</tspan><tspan x="18" y="96">record; revokes by closing</tspan></text></g>
@@ -67,7 +67,7 @@
     <text class="b"><tspan x="18" y="58">ownership mint · profit mint</tspan><tspan x="18" y="80">DefaultAccountState = Frozen</tspan><tspan x="18" y="102">TransferHook · TokenMetadata</tspan><tspan x="18" y="124">mint and freeze authority:</tspan><tspan x="18" y="146">the asset PDA</tspan></text></g>
   <g transform="translate(980 276)"><rect class="ext" width="260" height="164" rx="14"/>
     <text x="18" y="32" class="h">USDC vaults</text>
-    <text class="b"><tspan x="18" y="58">capital vault → SPE treasury</tspan><tspan x="18" y="80">(pinned at creation)</tspan><tspan x="18" y="108">income vault → profit holders</tspan><tspan x="18" y="130">a stray transfer changes no</tspan><tspan x="18" y="152">accounting</tspan></text></g>
+    <text class="b"><tspan x="18" y="58">capital vault → SPV treasury</tspan><tspan x="18" y="80">(pinned at creation)</tspan><tspan x="18" y="108">income vault → profit holders</tspan><tspan x="18" y="130">a stray transfer changes no</tspan><tspan x="18" y="152">accounting</tspan></text></g>
   <g transform="translate(980 456)"><rect class="ext" width="260" height="164" rx="14"/>
     <text x="18" y="32" class="h">Attestation Service</text>
     <text class="b"><tspan x="18" y="58">credential · member schema</tspan><tspan x="18" y="80">one attestation per wallet at</tspan><tspan x="18" y="102">PDA(credential, schema, wallet)</tspan><tspan x="18" y="124">claim hash + tier + expiry</tspan></text></g>

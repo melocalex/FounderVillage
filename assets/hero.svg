@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" role="img" aria-labelledby="t d">
+  <title id="t">Cachain</title>
+  <desc id="d">Real-world assets owned by the people who build them, on Solana.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1026"/>
+      <stop offset="0.55" stop-color="#121A3D"/>
+      <stop offset="1" stop-color="#0E2A3A"/>
+    </linearGradient>
+    <linearGradient id="sol" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#9945FF"/>
+      <stop offset="1" stop-color="#14F195"/>
+    </linearGradient>
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFB86B"/>
+      <stop offset="1" stop-color="#FF6B6B"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#14F195" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#14F195" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="round"><rect width="1280" height="420" rx="28"/></clipPath>
+  </defs>
+  <g clip-path="url(#round)">
+    <rect width="1280" height="420" fill="url(#sky)"/>
+    <!-- stars -->
+    <g fill="#ffffff" opacity="0.5">
+      <circle cx="90" cy="60" r="1.4"/><circle cx="210" cy="120" r="1"/><circle cx="380" cy="48" r="1.2"/>
+      <circle cx="560" cy="96" r="0.9"/><circle cx="700" cy="40" r="1.3"/><circle cx="1180" cy="70" r="1.1"/>
+      <circle cx="1240" cy="150" r="0.9"/><circle cx="640" cy="160" r="0.8"/>
+    </g>
+    <!-- sun -->
+    <circle cx="1010" cy="250" r="118" fill="url(#sun)" opacity="0.9"/>
+    <g stroke="#0B1026" stroke-width="7" opacity="0.55">
+      <line x1="880" y1="232" x2="1140" y2="232"/><line x1="880" y1="258" x2="1140" y2="258"/>
+      <line x1="880" y1="284" x2="1140" y2="284"/><line x1="880" y1="310" x2="1140" y2="310"/>
+    </g>
+    <!-- the house on the dune -->
+    <g transform="translate(905 196)">
+      <rect x="0" y="62" width="150" height="88" rx="6" fill="#F4E7D3"/>
+      <path d="M-14 66 L75 6 L164 66 Z" fill="#0B1026"/>
+      <path d="M-14 66 L75 6 L164 66" fill="none" stroke="url(#sol)" stroke-width="5" stroke-linejoin="round"/>
+      <rect x="18" y="86" width="34" height="30" rx="4" fill="#0E2A3A"/>
+      <rect x="98" y="86" width="34" height="30" rx="4" fill="#0E2A3A"/>
+      <rect x="61" y="104" width="28" height="46" rx="4" fill="#9945FF"/>
+      <circle cx="35" cy="101" r="3" fill="#14F195"/><circle cx="115" cy="101" r="3" fill="#14F195"/>
+    </g>
+    <!-- sea -->
+    <rect x="0" y="342" width="1280" height="78" fill="url(#sea)"/>
+    <path d="M0 352 C 80 340, 160 364, 240 352 S 400 340, 480 352 S 640 364, 720 352 S 880 340, 960 352 S 1120 364, 1280 352" fill="none" stroke="#14F195" stroke-width="2.5" opacity="0.7"/>
+    <path d="M0 376 C 80 364, 160 388, 240 376 S 400 364, 480 376 S 640 388, 720 376 S 880 364, 960 376 S 1120 388, 1280 376" fill="none" stroke="#9945FF" stroke-width="2" opacity="0.55"/>
+    <!-- chain of tokens -->
+    <g transform="translate(672 306)" opacity="0.95">
+      <g stroke="url(#sol)" stroke-width="5" fill="none">
+        <rect x="0" y="0" width="64" height="36" rx="18"/>
+        <rect x="46" y="0" width="64" height="36" rx="18"/>
+        <rect x="92" y="0" width="64" height="36" rx="18"/>
+        <rect x="138" y="0" width="64" height="36" rx="18"/>
+      </g>
+    </g>
+    <!-- wordmark -->
+    <text x="72" y="168" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="92" font-weight="800" fill="#ffffff" letter-spacing="-2">Cachain</text>
+    <rect x="76" y="186" width="210" height="6" rx="3" fill="url(#sol)"/>
+    <text x="74" y="236" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="27" font-weight="500" fill="#E7E9F5">Real-world assets, owned by the people who build them.</text>
+    <text x="74" y="272" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="20" fill="#9AA3C7">Founder Village · Jurerê Internacional, Florianópolis · on Solana</text>
+    <!-- pills -->
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="15" fill="#E7E9F5">
+      <g transform="translate(74 306)">
+        <rect width="150" height="34" rx="17" fill="#ffffff" fill-opacity="0.07" stroke="#9945FF" stroke-opacity="0.8"/>
+        <text x="75" y="22" text-anchor="middle">Token-2022</text>
+      </g>
+      <g transform="translate(236 306)">
+        <rect width="190" height="34" rx="17" fill="#ffffff" fill-opacity="0.07" stroke="#14F195" stroke-opacity="0.8"/>
+        <text x="95" y="22" text-anchor="middle">SAS whitelist gate</text>
+      </g>
+      <g transform="translate(438 306)">
+        <rect width="196" height="34" rx="17" fill="#ffffff" fill-opacity="0.07" stroke="#FFB86B" stroke-opacity="0.9"/>
+        <text x="98" y="22" text-anchor="middle">Squads 2-of-3 council</text>
+      </g>
+    </g>
+  </g>
+</svg>

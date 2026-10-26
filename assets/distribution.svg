@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="500" viewBox="0 0 1280 500" role="img" aria-labelledby="t d">
+  <title id="t">Pull distributions</title>
+  <desc id="d">Each rent inflow raises a reward index by amount divided by tracked profit supply. A holder's claim is their balance times the index rise since they last settled. The transfer hook settles both sides before moving tokens, so income earned before a transfer stays with the sender.</desc>
+  <defs>
+    <linearGradient id="sol" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#9945FF"/><stop offset="1" stop-color="#14F195"/></linearGradient>
+    <style>
+      .t { font: 800 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #fff; }
+      .s { font: 400 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #9AA3C7; }
+      .h { font: 700 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #fff; }
+      .b { font: 400 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #C9CEE6; }
+      .m { font: 500 13px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #14F195; }
+      .ax { font: 500 12px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #6E78A8; }
+      .card { fill: #161E45; stroke: #2B3570; }
+    </style>
+  </defs>
+  <rect width="1280" height="500" rx="24" fill="#0B1026"/>
+  <text x="40" y="52" class="t">Rent reaches holders without anyone listing them</text>
+  <text x="40" y="80" class="s">No snapshot, no Merkle root, no authority stating who holds what: the program tracks every profit-token balance itself.</text>
+
+  <!-- chart -->
+  <g transform="translate(40 110)">
+    <rect class="card" width="640" height="350" rx="16"/>
+    <text x="20" y="32" class="h">Reward index over time (example from the test suite)</text>
+    <line x1="60" y1="300" x2="610" y2="300" stroke="#3A4580"/>
+    <line x1="60" y1="70" x2="60" y2="300" stroke="#3A4580"/>
+    <text x="52" y="304" class="ax" text-anchor="end">0</text>
+    <text x="52" y="190" class="ax" text-anchor="end">0.1</text>
+    <text x="52" y="84" class="ax" text-anchor="end">0.2</text>
+    <line x1="60" y1="186" x2="610" y2="186" stroke="#2B3570" stroke-dasharray="3 5"/>
+    <line x1="60" y1="80" x2="610" y2="80" stroke="#2B3570" stroke-dasharray="3 5"/>
+    <path d="M60 300 L180 300 L180 186 L460 186 L460 80 L610 80" fill="none" stroke="url(#sol)" stroke-width="4" stroke-linejoin="round"/>
+    <circle cx="180" cy="186" r="6" fill="#14F195"/><circle cx="460" cy="80" r="6" fill="#14F195"/>
+    <text x="186" y="176" class="m">rent 1,875</text>
+    <text x="466" y="70" class="m">rent 1,875</text>
+    <line x1="320" y1="300" x2="320" y2="120" stroke="#FFB86B" stroke-width="2" stroke-dasharray="6 5"/>
+    <text x="326" y="134" class="m" style="fill:#FFB86B">Ana sends Bruno</text>
+    <text x="326" y="152" class="m" style="fill:#FFB86B">2,000 profit tokens</text>
+    <text x="70" y="326" class="ax">profit holders: Ana 10,000 · Bruno 5,000 · holding 3,750 (= 18,750)</text>
+    <text x="70" y="342" class="ax">accrued: Ana 1,000 + 800 · Bruno 500 + 700 · holding 375 + 375</text>
+  </g>
+
+  <!-- rules -->
+  <g transform="translate(700 110)">
+    <rect class="card" width="540" height="104" rx="16"/>
+    <text x="20" y="32" class="h">record_inflow(amount)</text>
+    <text x="20" y="58" class="m">index += amount / tracked_supply</text>
+    <text x="20" y="84" class="b">mints nothing; a rounding remainder waits for the next inflow</text>
+  </g>
+  <g transform="translate(700 233)">
+    <rect class="card" width="540" height="104" rx="16"/>
+    <text x="20" y="32" class="h">transfer hook, on every profit-token transfer</text>
+    <text x="20" y="58" class="m">settle(sender); settle(receiver); move balance</text>
+    <text x="20" y="84" class="b">positions come from the token accounts' owners, not from the caller</text>
+  </g>
+  <g transform="translate(700 356)">
+    <rect class="card" width="540" height="104" rx="16"/>
+    <text x="20" y="32" class="h">claim_distribution</text>
+    <text x="20" y="58" class="m">pay = accrued + balance × (index − last)</text>
+    <text x="20" y="84" class="b">rounds down, pays once, never more than was recorded</text>
+  </g>
+</svg>

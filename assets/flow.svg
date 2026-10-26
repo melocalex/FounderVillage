@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="460" viewBox="0 0 1280 460" role="img" aria-labelledby="t d">
+  <title id="t">How an asset gets built and owned</title>
+  <desc id="d">A member names a gap, the council curates it into a bounty, members deliver work or capital, they receive ownership and profit tokens through the eligibility gate, the asset earns rent, and profit holders claim it.</desc>
+  <defs>
+    <linearGradient id="sol" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#9945FF"/>
+      <stop offset="1" stop-color="#14F195"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#14F195"/>
+    </marker>
+    <style>
+      .h { font: 700 19px -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #ffffff; }
+      .b { font: 400 14.5px -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #C9CEE6; }
+      .m { font: 500 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #14F195; }
+      .n { font: 800 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #0B1026; }
+      .title { font: 800 26px -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #ffffff; }
+      .sub { font: 400 16px -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif; fill: #9AA3C7; }
+      .card { fill: #161E45; stroke: #2B3570; }
+    </style>
+  </defs>
+  <rect width="1280" height="460" rx="24" fill="#0B1026"/>
+  <text x="40" y="54" class="title">From a gap to an owned asset</text>
+  <text x="40" y="82" class="sub">Value follows delivery. Every step is an instruction with its own signer, so the lifecycle lives in the program, not in a config flag.</text>
+
+  <!-- six cards: x = 40 + i*204, width 184 -->
+  <g transform="translate(40 112)">
+    <rect class="card" width="184" height="236" rx="16"/>
+    <circle cx="28" cy="30" r="15" fill="#FFB86B"/><text x="28" y="35" class="n" text-anchor="middle">1</text>
+    <text x="52" y="36" class="h">Name a gap</text>
+    <text class="b"><tspan x="18" y="72">A whitelisted member</tspan><tspan x="18" y="92">proposes what the</tspan><tspan x="18" y="112">asset is missing.</tspan></text>
+    <text class="m"><tspan x="18" y="210">propose_bounty</tspan></text>
+  </g>
+  <g transform="translate(244 112)">
+    <rect class="card" width="184" height="236" rx="16"/>
+    <circle cx="28" cy="30" r="15" fill="#FFB86B"/><text x="28" y="35" class="n" text-anchor="middle">2</text>
+    <text x="52" y="36" class="h">Curate</text>
+    <text class="b"><tspan x="18" y="72">The 2-of-3 council</tspan><tspan x="18" y="92">writes the exchange:</tspan><tspan x="18" y="112">a reward, or a price</tspan><tspan x="18" y="132">and a target. It never</tspan><tspan x="18" y="152">changes again.</tspan></text>
+    <text class="m"><tspan x="18" y="194">curate_bounty</tspan><tspan x="18" y="212">open_bounty</tspan></text>
+  </g>
+  <g transform="translate(448 112)">
+    <rect class="card" width="184" height="236" rx="16"/>
+    <circle cx="28" cy="30" r="15" fill="#FFB86B"/><text x="28" y="35" class="n" text-anchor="middle">3</text>
+    <text x="52" y="36" class="h">Deliver</text>
+    <text class="b"><tspan x="18" y="72">Work: claim it, deliver</tspan><tspan x="18" y="92">it, the council accepts.</tspan><tspan x="18" y="122">Capital: USDC goes</tspan><tspan x="18" y="142">into the SPE vault.</tspan></text>
+    <text class="m"><tspan x="18" y="176">claim_bounty</tspan><tspan x="18" y="194">submit_delivery</tspan><tspan x="18" y="212">contribute</tspan></text>
+  </g>
+  <g transform="translate(652 112)">
+    <rect class="card" width="184" height="236" rx="16" stroke="url(#sol)" stroke-width="2"/>
+    <circle cx="28" cy="30" r="15" fill="#14F195"/><text x="28" y="35" class="n" text-anchor="middle">4</text>
+    <text x="52" y="36" class="h">Own it</text>
+    <text class="b"><tspan x="18" y="72">Ownership and profit</tspan><tspan x="18" y="92">tokens mint into an</tspan><tspan x="18" y="112">account born frozen.</tspan><tspan x="18" y="132">The gate thaws it for</tspan><tspan x="18" y="152">attested wallets only.</tspan></text>
+    <text class="m"><tspan x="18" y="194">thaw_holder</tspan><tspan x="18" y="212">settle_work</tspan></text>
+  </g>
+  <g transform="translate(856 112)">
+    <rect class="card" width="184" height="236" rx="16"/>
+    <circle cx="28" cy="30" r="15" fill="#FFB86B"/><text x="28" y="35" class="n" text-anchor="middle">5</text>
+    <text x="52" y="36" class="h">Operate</text>
+    <text class="b"><tspan x="18" y="72">The operating company</tspan><tspan x="18" y="92">pays rent into the</tspan><tspan x="18" y="112">income vault. It mints</tspan><tspan x="18" y="132">nothing and raises every</tspan><tspan x="18" y="152">profit holder's claim.</tspan></text>
+    <text class="m"><tspan x="18" y="212">record_inflow</tspan></text>
+  </g>
+  <g transform="translate(1060 112)">
+    <rect class="card" width="184" height="236" rx="16"/>
+    <circle cx="28" cy="30" r="15" fill="#FFB86B"/><text x="28" y="35" class="n" text-anchor="middle">6</text>
+    <text x="52" y="36" class="h">Claim</text>
+    <text class="b"><tspan x="18" y="72">Holders pull their pro</tspan><tspan x="18" y="92">rata share whenever</tspan><tspan x="18" y="112">they like. Transfers</tspan><tspan x="18" y="132">carry future income</tspan><tspan x="18" y="152">with the token.</tspan></text>
+    <text class="m"><tspan x="18" y="212">claim_distribution</tspan></text>
+  </g>
+
+  <!-- arrows between cards -->
+  <g stroke="#14F195" stroke-width="2.5" fill="none" marker-end="url(#arrow)">
+    <line x1="226" y1="230" x2="240" y2="230"/>
+    <line x1="430" y1="230" x2="444" y2="230"/>
+    <line x1="634" y1="230" x2="648" y2="230"/>
+    <line x1="838" y1="230" x2="852" y2="230"/>
+    <line x1="1042" y1="230" x2="1056" y2="230"/>
+  </g>
+  <!-- the loop -->
+  <path d="M1152 352 C 1152 398, 1000 398, 640 398 S 132 398, 132 352" fill="none" stroke="url(#sol)" stroke-width="2.5" stroke-dasharray="7 7" marker-end="url(#arrow)"/>
+  <text x="640" y="438" text-anchor="middle" class="sub">the asset operates, holders bring the next residents, and the next gap starts the loop again</text>
+</svg>

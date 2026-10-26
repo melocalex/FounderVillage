@@ -93,7 +93,8 @@ pub struct Ledger {
 pub struct Distribution {
     /// Cumulative income per profit-token base unit, scaled by `math::INDEX_SCALE`.
     pub reward_index: u128,
-    /// Sum of every `Position::balance`. Equals profit supply minus burned tokens.
+    /// Sum of every `Position::balance`: every profit token ever minted. Burns skip the hook,
+    /// so a burned token keeps its income share with the burner; nobody else's share shrinks.
     pub tracked_supply: u64,
     /// Income recorded while `tracked_supply` was zero, folded into the next inflow.
     pub carry: u64,

@@ -6,14 +6,14 @@ import { getTransferCheckedInstruction } from '@solana-program/token';
 import {
   BountyKind,
   BountyState,
-  CACHAIN_ERROR__DEADLINE_PASSED,
-  CACHAIN_ERROR__EXCEEDS_CAPITAL,
-  CACHAIN_ERROR__EXCEEDS_TARGET,
-  CACHAIN_ERROR__FUNDS_RAISED,
-  CACHAIN_ERROR__INVALID_BOUNTY_STATE,
-  CACHAIN_ERROR__NOT_COUNCIL,
-  CACHAIN_ERROR__WRONG_BOUNTY_KIND,
-  CACHAIN_ERROR__ZERO_TOKENS,
+  FOUNDER_VILLAGE_ERROR__DEADLINE_PASSED,
+  FOUNDER_VILLAGE_ERROR__EXCEEDS_CAPITAL,
+  FOUNDER_VILLAGE_ERROR__EXCEEDS_TARGET,
+  FOUNDER_VILLAGE_ERROR__FUNDS_RAISED,
+  FOUNDER_VILLAGE_ERROR__INVALID_BOUNTY_STATE,
+  FOUNDER_VILLAGE_ERROR__NOT_COUNCIL,
+  FOUNDER_VILLAGE_ERROR__WRONG_BOUNTY_KIND,
+  FOUNDER_VILLAGE_ERROR__ZERO_TOKENS,
   claimBountyInstruction,
   fetchBounty,
   getCancelBountyInstructionAsync,
@@ -70,14 +70,14 @@ describe('financial bounties', () => {
   it('refuses a contribution above the remaining target', async () => {
     const { world } = ctx;
     const target = BigInt(config.tranches[0]!.targetUsdc) * USDC;
-    await expectCode(contribute(world, bounty, world.keys.ana, target), CACHAIN_ERROR__EXCEEDS_TARGET);
+    await expectCode(contribute(world, bounty, world.keys.ana, target), FOUNDER_VILLAGE_ERROR__EXCEEDS_TARGET);
   });
 
   it('pauses and resumes contributions through the council', async () => {
     const { world } = ctx;
     await world.asCouncil([await getPauseBountyInstructionAsync(council())]);
     expect((await fetchBounty(world.client.rpc, bounty)).data.state).toBe(BountyState.Paused);
-    await expectCode(contribute(world, bounty, world.keys.ana, USDC), CACHAIN_ERROR__INVALID_BOUNTY_STATE);
+    await expectCode(contribute(world, bounty, world.keys.ana, USDC), FOUNDER_VILLAGE_ERROR__INVALID_BOUNTY_STATE);
     await world.asCouncil([await getResumeBountyInstructionAsync(council())]);
     await contribute(world, bounty, world.keys.ana, USDC);
   });
@@ -85,21 +85,21 @@ describe('financial bounties', () => {
   it('refuses pause, resume or close from a single council member', async () => {
     const { world } = ctx;
     const single = { council: world.keys.councilA, asset: world.asset.address, bounty };
-    await expectCode(world.send([await getPauseBountyInstructionAsync(single)]), CACHAIN_ERROR__NOT_COUNCIL);
-    await expectCode(world.send([await getResumeBountyInstructionAsync(single)]), CACHAIN_ERROR__NOT_COUNCIL);
-    await expectCode(world.send([await getCloseFundingInstructionAsync(single)]), CACHAIN_ERROR__NOT_COUNCIL);
+    await expectCode(world.send([await getPauseBountyInstructionAsync(single)]), FOUNDER_VILLAGE_ERROR__NOT_COUNCIL);
+    await expectCode(world.send([await getResumeBountyInstructionAsync(single)]), FOUNDER_VILLAGE_ERROR__NOT_COUNCIL);
+    await expectCode(world.send([await getCloseFundingInstructionAsync(single)]), FOUNDER_VILLAGE_ERROR__NOT_COUNCIL);
   });
 
   it('refuses cancellation once capital is raised', async () => {
     const { world } = ctx;
-    await expectCode(world.asCouncil([await getCancelBountyInstructionAsync(council())]), CACHAIN_ERROR__FUNDS_RAISED);
+    await expectCode(world.asCouncil([await getCancelBountyInstructionAsync(council())]), FOUNDER_VILLAGE_ERROR__FUNDS_RAISED);
   });
 
   it('refuses work-bounty actions on a financial bounty', async () => {
     const { world } = ctx;
     await expectCode(
       world.send([await claimBountyInstruction(world.asset, bounty, world.keys.bruno)]),
-      CACHAIN_ERROR__WRONG_BOUNTY_KIND,
+      FOUNDER_VILLAGE_ERROR__WRONG_BOUNTY_KIND,
     );
   });
 
@@ -110,7 +110,7 @@ describe('financial bounties', () => {
       priceDen: 1_000n,
       target: 1_000n * USDC,
     });
-    await expectCode(contribute(world, tiny, world.keys.ana, 999n), CACHAIN_ERROR__ZERO_TOKENS);
+    await expectCode(contribute(world, tiny, world.keys.ana, 999n), FOUNDER_VILLAGE_ERROR__ZERO_TOKENS);
   });
 
   it('refuses contributions after the deadline', async () => {
@@ -124,7 +124,7 @@ describe('financial bounties', () => {
     });
     await contribute(world, timed, world.keys.ana, USDC);
     setTime(deadline + 1n);
-    await expectCode(contribute(world, timed, world.keys.ana, USDC), CACHAIN_ERROR__DEADLINE_PASSED);
+    await expectCode(contribute(world, timed, world.keys.ana, USDC), FOUNDER_VILLAGE_ERROR__DEADLINE_PASSED);
   });
 
   it('keeps the vault equal to contributions minus recorded outflows, ignoring stray transfers', async () => {
@@ -158,15 +158,15 @@ describe('financial bounties', () => {
     ]);
     expect((await ledger(world)).ledger).toEqual(l.ledger);
 
-    await expectCode(world.asCouncil([await outflow(l.ledger.contributed)]), CACHAIN_ERROR__EXCEEDS_CAPITAL);
+    await expectCode(world.asCouncil([await outflow(l.ledger.contributed)]), FOUNDER_VILLAGE_ERROR__EXCEEDS_CAPITAL);
     // One council member alone is not the council.
-    await expectCode(world.send([await outflow(USDC, world.keys.councilA)]), CACHAIN_ERROR__NOT_COUNCIL);
+    await expectCode(world.send([await outflow(USDC, world.keys.councilA)]), FOUNDER_VILLAGE_ERROR__NOT_COUNCIL);
   });
 
   it('closes the tranche, after which nothing more can be raised', async () => {
     const { world } = ctx;
     await world.asCouncil([await getCloseFundingInstructionAsync(council())]);
     expect((await fetchBounty(world.client.rpc, bounty)).data.state).toBe(BountyState.Settled);
-    await expectCode(contribute(world, bounty, world.keys.ana, USDC), CACHAIN_ERROR__INVALID_BOUNTY_STATE);
+    await expectCode(contribute(world, bounty, world.keys.ana, USDC), FOUNDER_VILLAGE_ERROR__INVALID_BOUNTY_STATE);
   });
 });

@@ -6,7 +6,7 @@ members. **Time:** ~15 min.
 ## How it works
 
 A **work bounty** goes `Proposed → Curated → Open → Claimed → Delivered → Accepted → Settled`
-(or `Rejected`). The council is a Squads 2-of-3 vault: its address signs Cachain's council
+(or `Rejected`). The council is a Squads 2-of-3 vault: its address signs Founder Village's council
 instructions only after two members approve inside Squads. `settle_work` mints exactly the reward
 written at curation, to the member who claimed it, and is permissionless because nothing about it
 is left to choose.

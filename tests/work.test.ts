@@ -5,14 +5,14 @@ import { fetchMint } from '@solana-program/token-2022';
 import {
   BountyKind,
   BountyState,
-  CACHAIN_ERROR__EMPTY_DELIVERY,
-  CACHAIN_ERROR__INVALID_BOUNTY_STATE,
-  CACHAIN_ERROR__INVALID_REWARD,
-  CACHAIN_ERROR__INVALID_TITLE,
-  CACHAIN_ERROR__NOT_CLAIMANT,
-  CACHAIN_ERROR__NOT_COUNCIL,
-  CACHAIN_ERROR__NOT_ELIGIBLE,
-  CACHAIN_ERROR__WRONG_BOUNTY_KIND,
+  FOUNDER_VILLAGE_ERROR__EMPTY_DELIVERY,
+  FOUNDER_VILLAGE_ERROR__INVALID_BOUNTY_STATE,
+  FOUNDER_VILLAGE_ERROR__INVALID_REWARD,
+  FOUNDER_VILLAGE_ERROR__INVALID_TITLE,
+  FOUNDER_VILLAGE_ERROR__NOT_CLAIMANT,
+  FOUNDER_VILLAGE_ERROR__NOT_COUNCIL,
+  FOUNDER_VILLAGE_ERROR__NOT_ELIGIBLE,
+  FOUNDER_VILLAGE_ERROR__WRONG_BOUNTY_KIND,
   claimBountyInstruction,
   fetchBounty,
   findBountyPda,
@@ -54,11 +54,11 @@ describe('work bounties', () => {
     await world.refresh();
     await expectCode(
       world.send([await proposeInstruction(world.asset, world.keys.eve, BountyKind.Work, 'Gap from outside', await hash('x'))]),
-      CACHAIN_ERROR__NOT_ELIGIBLE,
+      FOUNDER_VILLAGE_ERROR__NOT_ELIGIBLE,
     );
     await expectCode(
       world.send([await proposeInstruction(world.asset, world.keys.ana, BountyKind.Work, '', await hash('x'))]),
-      CACHAIN_ERROR__INVALID_TITLE,
+      FOUNDER_VILLAGE_ERROR__INVALID_TITLE,
     );
   });
 
@@ -70,7 +70,7 @@ describe('work bounties', () => {
       bounty,
       terms: { ...zeroTerms, reward: reward * 100n },
     });
-    await expectCode(world.asCouncil([again]), CACHAIN_ERROR__INVALID_BOUNTY_STATE);
+    await expectCode(world.asCouncil([again]), FOUNDER_VILLAGE_ERROR__INVALID_BOUNTY_STATE);
     expect((await fetchBounty(world.client.rpc, bounty)).data.terms.reward).toBe(reward);
   });
 
@@ -85,8 +85,8 @@ describe('work bounties', () => {
       bounty: next,
       terms: zeroTerms,
     });
-    await expectCode(world.asCouncil([curate]), CACHAIN_ERROR__INVALID_REWARD);
-    await expectCode(contribute(world, bounty, world.keys.ana, 1n), CACHAIN_ERROR__WRONG_BOUNTY_KIND);
+    await expectCode(world.asCouncil([curate]), FOUNDER_VILLAGE_ERROR__INVALID_REWARD);
+    await expectCode(contribute(world, bounty, world.keys.ana, 1n), FOUNDER_VILLAGE_ERROR__WRONG_BOUNTY_KIND);
   });
 
   it('runs claimed → delivered → accepted → settled, minting exactly the reward', async () => {
@@ -94,7 +94,7 @@ describe('work bounties', () => {
     const [ownBefore, proBefore] = await supply();
     await expectCode(
       world.send([await claimBountyInstruction(world.asset, bounty, world.keys.eve)]),
-      CACHAIN_ERROR__NOT_ELIGIBLE,
+      FOUNDER_VILLAGE_ERROR__NOT_ELIGIBLE,
     );
     await world.send([await claimBountyInstruction(world.asset, bounty, world.keys.bruno)]);
 
@@ -102,16 +102,16 @@ describe('work bounties', () => {
       hash('rooftop-shade-drawings-v3').then((d) =>
         getSubmitDeliveryInstructionAsync({ claimant, bounty, deliveryHash: h ?? d }),
       );
-    await expectCode(world.send([await deliver(world.keys.ana)]), CACHAIN_ERROR__NOT_CLAIMANT);
-    await expectCode(world.send([await deliver(world.keys.bruno, new Uint8Array(32))]), CACHAIN_ERROR__EMPTY_DELIVERY);
+    await expectCode(world.send([await deliver(world.keys.ana)]), FOUNDER_VILLAGE_ERROR__NOT_CLAIMANT);
+    await expectCode(world.send([await deliver(world.keys.bruno, new Uint8Array(32))]), FOUNDER_VILLAGE_ERROR__EMPTY_DELIVERY);
     await world.send([await deliver()]);
 
     // No mint without an accepted bounty.
-    await expectCode(world.send([await settleWorkInstruction(world.asset, bounty, world.keys.bruno.address)]), CACHAIN_ERROR__INVALID_BOUNTY_STATE);
+    await expectCode(world.send([await settleWorkInstruction(world.asset, bounty, world.keys.bruno.address)]), FOUNDER_VILLAGE_ERROR__INVALID_BOUNTY_STATE);
     // One council member alone cannot accept.
     const accept = (council = councilSigner(world)) =>
       getAcceptDeliveryInstructionAsync({ council, asset: world.asset.address, bounty });
-    await expectCode(world.send([await accept(world.keys.councilB)]), CACHAIN_ERROR__NOT_COUNCIL);
+    await expectCode(world.send([await accept(world.keys.councilB)]), FOUNDER_VILLAGE_ERROR__NOT_COUNCIL);
     await world.asCouncil([await accept()]);
 
     await world.send([await settleWorkInstruction(world.asset, bounty, world.keys.bruno.address)]);
@@ -124,7 +124,7 @@ describe('work bounties', () => {
     expect((await fetchBounty(world.client.rpc, bounty)).data.state).toBe(BountyState.Settled);
 
     // Settling twice is refused.
-    await expectCode(world.send([await settleWorkInstruction(world.asset, bounty, world.keys.bruno.address)]), CACHAIN_ERROR__INVALID_BOUNTY_STATE);
+    await expectCode(world.send([await settleWorkInstruction(world.asset, bounty, world.keys.bruno.address)]), FOUNDER_VILLAGE_ERROR__INVALID_BOUNTY_STATE);
   });
 
   it('lets the council cancel a claim that is never delivered', async () => {
@@ -151,7 +151,7 @@ describe('work bounties', () => {
     await world.asCouncil([
       await getRejectDeliveryInstructionAsync({ council: councilSigner(world), asset: world.asset.address, bounty: b }),
     ]);
-    await expectCode(world.send([await settleWorkInstruction(world.asset, b, world.keys.ana.address)]), CACHAIN_ERROR__INVALID_BOUNTY_STATE);
+    await expectCode(world.send([await settleWorkInstruction(world.asset, b, world.keys.ana.address)]), FOUNDER_VILLAGE_ERROR__INVALID_BOUNTY_STATE);
     expect(await supply()).toEqual(before);
     expect((await fetchBounty(world.client.rpc, b)).data.state).toBe(BountyState.Rejected);
   });

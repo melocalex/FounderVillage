@@ -1,4 +1,4 @@
-// LiteSVM world: the Cachain program from target/deploy plus the mainnet SAS and Squads
+// LiteSVM world: the Founder Village program from target/deploy plus the mainnet SAS and Squads
 // binaries fetched by `npm run fixtures:programs`. Everything runs in process.
 import { readFileSync } from 'node:fs';
 import { expect } from 'vitest';
@@ -6,7 +6,7 @@ import { address, createClient, lamports, type Address } from '@solana/kit';
 import { litesvm } from '@solana/kit-plugin-litesvm';
 import { signer } from '@solana/kit-plugin-signer';
 import { Clock } from 'litesvm';
-import { CACHAIN_PROGRAM_ADDRESS, findCustomError, SQUADS_PROGRAM_ADDRESS } from '../clients/ts/src';
+import { FOUNDER_VILLAGE_PROGRAM_ADDRESS, findCustomError, SQUADS_PROGRAM_ADDRESS } from '../clients/ts/src';
 import { demoSigner, type DemoRole } from '../clients/ts/src/demo';
 import { buildWorld } from '../scripts/world';
 
@@ -17,7 +17,7 @@ export async function litesvmWorld(options?: { attest?: DemoRole[] }) {
   const client = await createClient()
     .use(signer(payer))
     .use(litesvm({ transactionConfig: { version: 1 } }));
-  client.svm.addProgramFromFile(CACHAIN_PROGRAM_ADDRESS, 'target/deploy/cachain.so');
+  client.svm.addProgramFromFile(FOUNDER_VILLAGE_PROGRAM_ADDRESS, 'target/deploy/founder_village.so');
   client.svm.addProgramFromFile(SAS, 'tests/fixtures/sas.so');
   client.svm.addProgramFromFile(SQUADS_PROGRAM_ADDRESS, 'tests/fixtures/squads.so');
   const programConfig = JSON.parse(readFileSync('tests/fixtures/squads-program-config.json', 'utf8'));

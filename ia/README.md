@@ -1,6 +1,6 @@
 # Working with an AI agent
 
-This folder helps a developer and an AI agent build on Cachain without guessing.
+This folder helps a developer and an AI agent build on Founder Village without guessing.
 
 | File | Use |
 |---|---|

@@ -5,7 +5,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   BountyKind,
   BountyState,
-  CACHAIN_ERROR__NOT_ELIGIBLE,
+  FOUNDER_VILLAGE_ERROR__NOT_ELIGIBLE,
   claimBountyInstruction,
   claimDistributionInstruction,
   contributeInstruction,
@@ -35,7 +35,7 @@ describe('Founder Haus end to end on Surfpool', () => {
     // A non-whitelisted wallet is turned away at the gate.
     await expectCode(
       world.send(await joinInstructions(rpc, world.asset, keys.eve.address, world.client.payer)),
-      CACHAIN_ERROR__NOT_ELIGIBLE,
+      FOUNDER_VILLAGE_ERROR__NOT_ELIGIBLE,
     );
     for (const m of [keys.ana, keys.bruno]) {
       await world.send(await joinInstructions(rpc, world.asset, m.address, world.client.payer));

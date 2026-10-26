@@ -22,7 +22,7 @@ import {
 import { findAttestationPda } from '@solana/attestation';
 import { revokeInstruction } from './attestations';
 import {
-  CACHAIN_PROGRAM_ADDRESS,
+  FOUNDER_VILLAGE_PROGRAM_ADDRESS,
   fetchAsset,
   fetchMaybePosition,
   findPositionPda,
@@ -37,7 +37,7 @@ import {
   getFreezeHolderInstructionAsync,
   type Asset,
   type BountyKind,
-} from './generated/cachain';
+} from './generated/founder-village';
 
 type ReadRpc = Rpc<GetAccountInfoApi & GetMultipleAccountsApi>;
 
@@ -49,7 +49,7 @@ const text = (s: string) => new TextEncoder().encode(s);
 
 export async function findAssetPda(creator: Address, assetId: bigint): Promise<Address> {
   const [pda] = await getProgramDerivedAddress({
-    programAddress: CACHAIN_PROGRAM_ADDRESS,
+    programAddress: FOUNDER_VILLAGE_PROGRAM_ADDRESS,
     seeds: [text('asset'), addr(creator), u64(assetId)],
   });
   return pda;
@@ -57,7 +57,7 @@ export async function findAssetPda(creator: Address, assetId: bigint): Promise<A
 
 export async function findBountyPda(asset: Address, id: bigint): Promise<Address> {
   const [pda] = await getProgramDerivedAddress({
-    programAddress: CACHAIN_PROGRAM_ADDRESS,
+    programAddress: FOUNDER_VILLAGE_PROGRAM_ADDRESS,
     seeds: [text('bounty'), addr(asset), u64(id)],
   });
   return pda;

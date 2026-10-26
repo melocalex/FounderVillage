@@ -16,6 +16,7 @@ import {
 } from '@solana/attestation';
 
 export const MEMBER_SCHEMA = {
+  // Frozen: the schema address on devnet derives from this name (the protocol's working name).
   name: 'cachain-member',
   description: 'Founder Village member eligibility: hash of the off-chain record and a tier',
   layout: [SchemaDataType.VecU8, SchemaDataType.U8],

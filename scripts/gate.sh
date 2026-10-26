@@ -9,7 +9,7 @@ cargo fmt --check
 step "clippy"
 cargo clippy --all-targets --locked -- -D warnings
 step "arithmetic unit and property tests"
-cargo test --locked -p cachain
+cargo test --locked -p founder_village
 step "anchor build"
 # --ignore-keys: a fresh checkout has no program keypair (git-ignored); declare_id! fixes the ID.
 anchor build --ignore-keys

@@ -3,9 +3,9 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { getTransferCheckedWithTransferHookInstructionAsync } from '@solana-program/token-2022';
 import {
-  CACHAIN_ERROR__NO_HOLDERS,
-  CACHAIN_ERROR__NOT_ELIGIBLE,
-  CACHAIN_ERROR__NOTHING_TO_CLAIM,
+  FOUNDER_VILLAGE_ERROR__NO_HOLDERS,
+  FOUNDER_VILLAGE_ERROR__NOT_ELIGIBLE,
+  FOUNDER_VILLAGE_ERROR__NOTHING_TO_CLAIM,
   claimDistributionInstruction,
   freezeInstructions,
   holderAccounts,
@@ -92,7 +92,7 @@ describe('distributions', () => {
     const funds = await usdcBalance(world, ana.funds);
     await world.send([await claimDistributionInstruction(world.asset, world.keys.ana)]);
     expect((await usdcBalance(world, ana.funds)) - funds).toBe(1_800n * USDC);
-    await expectCode(world.send([await claimDistributionInstruction(world.asset, world.keys.ana)]), CACHAIN_ERROR__NOTHING_TO_CLAIM);
+    await expectCode(world.send([await claimDistributionInstruction(world.asset, world.keys.ana)]), FOUNDER_VILLAGE_ERROR__NOTHING_TO_CLAIM);
   });
 
   it('keeps accruing for a frozen holder, who can claim only after reinstatement', async () => {
@@ -104,7 +104,7 @@ describe('distributions', () => {
     await recordInflow(world, 1_875n * USDC);
     // bruno holds 7,000 of 18,750: 700 more while frozen.
     expect(await accrued('bruno')).toBe(1_900n * USDC);
-    await expectCode(world.send([await claimDistributionInstruction(world.asset, world.keys.bruno)]), CACHAIN_ERROR__NOT_ELIGIBLE);
+    await expectCode(world.send([await claimDistributionInstruction(world.asset, world.keys.bruno)]), FOUNDER_VILLAGE_ERROR__NOT_ELIGIBLE);
     await world.attest('bruno');
     await join(world, world.keys.bruno);
     await world.send([await claimDistributionInstruction(world.asset, world.keys.bruno)]);
@@ -135,6 +135,6 @@ describe('distributions', () => {
 describe('distributions before anyone holds', () => {
   it('refuses income while nobody holds profit tokens, so the first minter cannot take it', async () => {
     const { world } = await litesvmWorld();
-    await expectCode(recordInflow(world, 1_000n * USDC), CACHAIN_ERROR__NO_HOLDERS);
+    await expectCode(recordInflow(world, 1_000n * USDC), FOUNDER_VILLAGE_ERROR__NO_HOLDERS);
   });
 });

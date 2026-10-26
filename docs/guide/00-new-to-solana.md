@@ -3,7 +3,7 @@
 **You leave with:** the mental model to read and change this repository without guessing.
 **Time:** ~45 min. **You need:** comfort with TypeScript; Rust helps but is not required yet.
 
-Every idea below is shown with the place it lives in Cachain, so you can open the file and see it.
+Every idea below is shown with the place it lives in Founder Village, so you can open the file and see it.
 
 ---
 
@@ -13,7 +13,7 @@ On most chains a contract holds its own data. **On Solana, programs hold no data
 executable code; everything it remembers lives in separate **accounts** that are passed to it in
 every call.
 
-So "the Cachain contract" is really one program plus many accounts: one per asset, one per bounty,
+So "the Founder Village contract" is really one program plus many accounts: one per asset, one per bounty,
 one per holder position, and so on. When you call an instruction you must hand it every account it
 will read or write. That is why our instruction builders take so many accounts, and why we
 generate them instead of writing them by hand.
@@ -30,7 +30,7 @@ Every account has:
 | data | bytes the owner program defines |
 
 Only the **owner program** may change an account's data or take its lamports. Our `Asset`,
-`Bounty`, `Position` and `Receipt` accounts are owned by Cachain; token accounts are owned by the
+`Bounty`, `Position` and `Receipt` accounts are owned by Founder Village; token accounts are owned by the
 Token-2022 program; attestations by the Attestation Service.
 
 **Rent** is a refundable deposit: an account must hold a minimum balance for its size (today 5,080
@@ -40,7 +40,7 @@ it; ask the cluster (`getMinimumBalanceForRentExemption`).
 ## 3. Who may do what: signers
 
 A transaction is signed by keys. An instruction can require that a given account **signed**. In
-Anchor that is `Signer<'info>`. Examples in Cachain:
+Anchor that is `Signer<'info>`. Examples in Founder Village:
 
 - `contribute` requires the contributor's signature: nobody can spend your USDC for you.
 - `curate_bounty` requires the **council** to sign. The council is not a person: it is a Squads
@@ -56,7 +56,7 @@ instructions. PDAs give us two things:
 2. **Program-held authority**: the asset PDA is the mint and freeze authority of both tokens and
    the owner of both USDC vaults, so only the program's rules can move them.
 
-Cachain's seeds (see `programs/cachain/src/state.rs`):
+Founder Village's seeds (see `programs/founder_village/src/state.rs`):
 
 | Account | Seeds |
 |---|---|
@@ -87,7 +87,7 @@ Errors come back as `Custom(code)`. Ours are 6000+, listed in `AGENTS.md`;
 
 ## 6. Tokens
 
-| Concept | In plain words | In Cachain |
+| Concept | In plain words | In Founder Village |
 |---|---|---|
 | **Mint** | the token's definition: decimals, supply, authorities | ownership mint, profit mint, USDC |
 | **Token account** | one wallet's balance of one mint | your FHO account, your FHP account |
@@ -100,7 +100,7 @@ adds **extensions**. Our asset mints use:
 
 - **DefaultAccountState = Frozen**: every new account starts frozen; our `thaw_holder` unfreezes it
   only for whitelisted wallets.
-- **TransferHook**: Token-2022 calls a program on every transfer. The profit mint calls Cachain, so
+- **TransferHook**: Token-2022 calls a program on every transfer. The profit mint calls Founder Village, so
   the income ledger follows the tokens.
 - **MetadataPointer + TokenMetadata**: name and symbol, so wallets display them.
 
@@ -110,15 +110,15 @@ for the asset tokens; and a transfer of a hooked token needs extra accounts, whi
 
 ## 7. Programs calling programs (CPI)
 
-A program can call another inside the same transaction (a cross-program invocation). Cachain calls
-Token-2022 to mint, freeze and thaw, signing as the asset PDA. Token-2022 calls Cachain's hook on
-every profit-token transfer. Squads calls Cachain when a council action executes. Each callee is
+A program can call another inside the same transaction (a cross-program invocation). Founder Village calls
+Token-2022 to mint, freeze and thaw, signing as the asset PDA. Token-2022 calls Founder Village's hook on
+every profit-token transfer. Squads calls Founder Village when a council action executes. Each callee is
 pinned in code, so nobody can swap in a fake program.
 
 ## 8. Anchor in ten minutes
 
-Cachain is written with **Anchor**, the standard Rust framework. Open
-`programs/cachain/src/instructions/issue.rs` and find `Contribute`:
+Founder Village is written with **Anchor**, the standard Rust framework. Open
+`programs/founder_village/src/instructions/issue.rs` and find `Contribute`:
 
 ```rust
 #[derive(Accounts)]
@@ -126,7 +126,7 @@ pub struct Contribute<'info> {
     #[account(mut)]
     pub contributor: Signer<'info>,                    // must sign
     #[account(mut, has_one = capital_vault, ...)]
-    pub asset: Box<Account<'info, Asset>>,             // owned by Cachain, typed, checked
+    pub asset: Box<Account<'info, Asset>>,             // owned by Founder Village, typed, checked
     #[account(mut, has_one = asset, constraint = bounty.kind == BountyKind::Financial ...)]
     pub bounty: Box<Account<'info, Bounty>>,
     ...
@@ -145,9 +145,9 @@ The program entry points are listed in `lib.rs`; each delegates to a file in `in
 
 ## 9. From program to typed client
 
-`anchor build` writes the **IDL** (`idl/cachain.json`), a JSON description of every instruction,
+`anchor build` writes the **IDL** (`idl/founder_village.json`), a JSON description of every instruction,
 account and error. **Codama** turns it into the TypeScript client in
-`clients/ts/src/generated/cachain` (`npm run codama`). Never hand-encode instruction bytes or
+`clients/ts/src/generated/founder-village` (`npm run codama`). Never hand-encode instruction bytes or
 decode accounts yourself; if the program changes, rebuild and regenerate, and CI fails if you
 forget.
 

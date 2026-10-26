@@ -11,7 +11,7 @@ Members help to build an asset in two ways: they do work, or they bring capital 
 contribution is a bounty. When a bounty is complete, the member gets the asset's tokens. When the
 asset earns rent, the token holders get their share.
 
-Cachain is the Solana program that enforces these rules. One program serves all assets.
+The Founder Village program on Solana enforces these rules. One program serves all assets.
 
 ## 2. The actors
 
@@ -30,7 +30,7 @@ Cachain is the Solana program that enforces these rules. One program serves all 
 |---|---|---|
 | Asset | `"asset"`, creator, asset id | rules, council, holding, SPV treasury, whitelist credential and schema, USDC ledger, reward index |
 | Ownership mint | `"mint"`, asset, `0` | Token-2022 mint. Accounts start frozen. |
-| Profit mint | `"mint"`, asset, `1` | Token-2022 mint with a transfer hook to Cachain. Accounts start frozen. |
+| Profit mint | `"mint"`, asset, `1` | Token-2022 mint with a transfer hook to Founder Village. Accounts start frozen. |
 | Capital vault | `"capital"`, asset | USDC from contributions |
 | Income vault | `"income"`, asset | USDC from rent |
 | Bounty | `"bounty"`, asset, id | kind, state, title, terms, raised, claimant |
@@ -94,8 +94,8 @@ Attestation Service is not deployed on testnet.
 
 | Path | Contents |
 |---|---|
-| `programs/cachain/src/` | the Anchor program |
-| `clients/ts/src/generated/cachain/` | the generated client. Do not edit. |
+| `programs/founder_village/src/` | the Anchor program |
+| `clients/ts/src/generated/founder-village/` | the generated client. Do not edit. |
 | `clients/ts/src/protocol.ts` | builders that fill every account |
 | `clients/ts/src/squads.ts` | the council flow |
 | `clients/ts/src/attestations.ts` | the whitelist flow |

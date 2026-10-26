@@ -1,6 +1,6 @@
 # 01 · Run it locally
 
-**You leave with:** a local Solana network running Cachain, seeded with Founder Haus, and the test
+**You leave with:** a local Solana network running Founder Village, seeded with Founder Haus, and the test
 harness open in your browser. **Time:** ~15 min (first build), ~1 min after.
 
 ## Option A: your machine
@@ -11,7 +11,7 @@ harness open in your browser. **Time:** ~15 min (first build), ~1 min after.
 | Rust ≥ 1.89, Solana CLI 4.1.2, Anchor 1.2.1 | building the program (a fresh clone always builds it once) |
 
 ```bash
-git clone https://github.com/melocalex/cachain && cd cachain
+git clone https://github.com/melocalex/foundervillage && cd foundervillage
 npm install --ignore-scripts
 npm run dev
 ```
@@ -47,7 +47,7 @@ signature, the fields that changed on-chain, and the exact error when it fails.
 
 ## If it fails
 
-- `missing target/deploy/cachain.so`: install the Rust toolchain (Option A) or use Docker.
+- `missing target/deploy/founder_village.so`: install the Rust toolchain (Option A) or use Docker.
 - Port 5183 busy: stop the other process; the harness uses a fixed port.
 - Fixtures fail to download: set `MAINNET_RPC_URL` to a private endpoint and retry.
 

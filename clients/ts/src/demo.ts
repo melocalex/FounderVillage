@@ -3,7 +3,7 @@
 // a public cluster, and never use this in the production frontend (it signs with a wallet).
 import { createKeyPairSignerFromPrivateKeyBytes, type KeyPairSigner } from '@solana/kit';
 
-export const DEMO_SEED = 'cachain-localnet-demo-v1';
+export const DEMO_SEED = 'founder-village-localnet-demo-v1';
 
 export const DEMO_ROLES = [
   'creator', // pays for and creates the asset

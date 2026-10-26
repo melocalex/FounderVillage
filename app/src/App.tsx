@@ -187,7 +187,7 @@ export function App() {
     <div className="app">
       <header className="top">
         <div className="brand">
-          <span className="logo">◆</span> Cachain <span className="sub">test harness</span>
+          <span className="logo">◆</span> Founder Village <span className="sub">test harness</span>
         </div>
         <div className="chips">
           <span className="chip good">localnet · Surfpool</span>

@@ -9,7 +9,7 @@ import { homedir } from 'node:os';
 import { createClient, signature, type Address } from '@solana/kit';
 import { solanaDevnetRpc } from '@solana/kit-plugin-rpc';
 import { signerFromFile } from '@solana/kit-plugin-signer';
-import { CACHAIN_PROGRAM_ADDRESS, SQUADS_PROGRAM_ADDRESS } from '../clients/ts/src';
+import { FOUNDER_VILLAGE_PROGRAM_ADDRESS, SQUADS_PROGRAM_ADDRESS } from '../clients/ts/src';
 import { SAS_PROGRAM_ADDRESS } from './localnet';
 
 // The public devnet RPC rate-limits by IP. A 429 is the limiter refusing the request before the
@@ -69,12 +69,12 @@ export const devnetClient = {
   },
 };
 for (const [name, program] of [
-  ['Cachain', CACHAIN_PROGRAM_ADDRESS],
+  ['Founder Village', FOUNDER_VILLAGE_PROGRAM_ADDRESS],
   ['Attestation Service', SAS_PROGRAM_ADDRESS],
   ['Squads', SQUADS_PROGRAM_ADDRESS],
 ] as const) {
   const { value } = await client.rpc.getAccountInfo(program as Address, { encoding: 'base64' }).send();
-  if (!value?.executable) throw new Error(`${name} (${program}) is not deployed on devnet${name === 'Cachain' ? ': run anchor deploy first' : ''}`);
+  if (!value?.executable) throw new Error(`${name} (${program}) is not deployed on devnet${name === 'Founder Village' ? ': run anchor deploy first' : ''}`);
 }
 
 /** The seed the devnet demo roles derive from. `create` makes it on the first `devnet:seed`. */
@@ -84,5 +84,6 @@ export function devnetSeed(create: boolean): string {
     mkdirSync('.devnet', { recursive: true });
     writeFileSync('.devnet/seed', randomBytes(32).toString('hex'), { mode: 0o600 });
   }
+  // Frozen salt (the protocol's working name): changing it changes every devnet role key.
   return `cachain-devnet:${readFileSync('.devnet/seed', 'utf8').trim()}`;
 }

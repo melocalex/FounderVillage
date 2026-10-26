@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# One pinned environment for building and testing Cachain: Rust, Solana CLI, Anchor, Node and
+# One pinned environment for building and testing Founder Village: Rust, Solana CLI, Anchor, Node and
 # the mainnet SAS and Squads binaries the tests run against. linux/amd64 because Surfpool's
 # embedded binary ships for Linux x86-64 only. Every download is checked against a SHA-256.
 
@@ -52,7 +52,7 @@ RUN curl -sSfL --retry 5 --retry-all-errors -o /tmp/node.tar.xz "https://nodejs.
 
 RUN rustc --version && solana --version && anchor --version && node --version
 
-WORKDIR /cachain
+WORKDIR /founder-village
 
 # Program first: this layer downloads the SBF platform-tools and compiles the dependencies once.
 FROM toolchain AS program

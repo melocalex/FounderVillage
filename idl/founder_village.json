@@ -1,0 +1,3153 @@
+{
+  "address": "CachxfgQfNcVhvjGGY5KMTSijdP8SVx4MqDxDniyQP6S",
+  "metadata": {
+    "name": "founder_village",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Founder Village asset tokenization: eligibility gate, bounties, contributions and pull distributions on Token-2022"
+  },
+  "instructions": [
+    {
+      "name": "accept_delivery",
+      "discriminator": [
+        153,
+        42,
+        84,
+        137,
+        56,
+        87,
+        13,
+        64
+      ],
+      "accounts": [
+        {
+          "name": "council",
+          "signer": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "asset",
+          "relations": [
+            "bounty"
+          ]
+        },
+        {
+          "name": "bounty",
+          "writable": true
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "cancel_bounty",
+      "discriminator": [
+        79,
+        65,
+        107,
+        143,
+        128,
+        165,
+        135,
+        46
+      ],
+      "accounts": [
+        {
+          "name": "council",
+          "signer": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "asset",
+          "relations": [
+            "bounty"
+          ]
+        },
+        {
+          "name": "bounty",
+          "writable": true
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim_bounty",
+      "discriminator": [
+        225,
+        157,
+        163,
+        238,
+        239,
+        169,
+        75,
+        226
+      ],
+      "accounts": [
+        {
+          "name": "claimant",
+          "signer": true
+        },
+        {
+          "name": "asset",
+          "relations": [
+            "bounty"
+          ]
+        },
+        {
+          "name": "bounty",
+          "writable": true
+        },
+        {
+          "name": "attestation"
+        },
+        {
+          "name": "credential"
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim_distribution",
+      "discriminator": [
+        204,
+        156,
+        94,
+        85,
+        2,
+        125,
+        232,
+        180
+      ],
+      "accounts": [
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": [
+            "position"
+          ]
+        },
+        {
+          "name": "asset",
+          "writable": true
+        },
+        {
+          "name": "position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "asset"
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "contribution_mint",
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "owner_funds",
+          "writable": true
+        },
+        {
+          "name": "income_vault",
+          "writable": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "attestation"
+        },
+        {
+          "name": "credential"
+        },
+        {
+          "name": "contribution_token_program"
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "close_funding",
+      "discriminator": [
+        151,
+        114,
+        204,
+        37,
+        205,
+        230,
+        237,
+        154
+      ],
+      "accounts": [
+        {
+          "name": "council",
+          "signer": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "asset",
+          "relations": [
+            "bounty"
+          ]
+        },
+        {
+          "name": "bounty",
+          "writable": true
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "contribute",
+      "discriminator": [
+        82,
+        33,
+        68,
+        131,
+        32,
+        0,
+        205,
+        95
+      ],
+      "accounts": [
+        {
+          "name": "contributor",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "asset",
+          "writable": true,
+          "relations": [
+            "bounty"
+          ]
+        },
+        {
+          "name": "bounty",
+          "writable": true
+        },
+        {
+          "name": "receipt",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  114,
+                  101,
+                  99,
+                  101,
+                  105,
+                  112,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "bounty"
+              },
+              {
+                "kind": "account",
+                "path": "contributor"
+              },
+              {
+                "kind": "arg",
+                "path": "receipt_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "contribution_mint",
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "contributor_funds",
+          "writable": true
+        },
+        {
+          "name": "capital_vault",
+          "writable": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "ownership_mint",
+          "writable": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "profit_mint",
+          "writable": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "contributor_ownership",
+          "writable": true
+        },
+        {
+          "name": "contributor_profit",
+          "writable": true
+        },
+        {
+          "name": "contributor_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "asset"
+              },
+              {
+                "kind": "account",
+                "path": "contributor"
+              }
+            ]
+          }
+        },
+        {
+          "name": "holding_ownership",
+          "writable": true
+        },
+        {
+          "name": "holding_profit",
+          "writable": true
+        },
+        {
+          "name": "holding_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "asset"
+              },
+              {
+                "kind": "account",
+                "path": "asset.holding",
+                "account": "Asset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "attestation"
+        },
+        {
+          "name": "credential"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "contribution_token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "receipt_id",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "create_asset",
+      "docs": [
+        "Creates the asset account and its USDC vaults from the policy numbers in the config file."
+      ],
+      "discriminator": [
+        28,
+        42,
+        120,
+        51,
+        7,
+        38,
+        156,
+        136
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "asset",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  97,
+                  115,
+                  115,
+                  101,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "arg",
+                "path": "args.asset_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "contribution_mint"
+        },
+        {
+          "name": "spe_treasury"
+        },
+        {
+          "name": "capital_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  112,
+                  105,
+                  116,
+                  97,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "asset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "income_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  105,
+                  110,
+                  99,
+                  111,
+                  109,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "asset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "contribution_token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "args",
+          "type": {
+            "defined": {
+              "name": "CreateAssetArgs"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "create_mints",
+      "docs": [
+        "Creates both Token-2022 mints with their fixed extension set and makes the asset live."
+      ],
+      "discriminator": [
+        71,
+        106,
+        121,
+        68,
+        208,
+        125,
+        224,
+        200
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "asset",
+          "writable": true
+        },
+        {
+          "name": "ownership_mint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "asset"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "profit_mint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "asset"
+              },
+              {
+                "kind": "const",
+                "value": [
+                  1
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "extra_metas",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  120,
+                  116,
+                  114,
+                  97,
+                  45,
+                  97,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  45,
+                  109,
+                  101,
+                  116,
+                  97,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "profit_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "ownership",
+          "type": {
+            "defined": {
+              "name": "TokenMeta"
+            }
+          }
+        },
+        {
+          "name": "profit",
+          "type": {
+            "defined": {
+              "name": "TokenMeta"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "curate_bounty",
+      "discriminator": [
+        34,
+        10,
+        114,
+        221,
+        76,
+        180,
+        96,
+        189
+      ],
+      "accounts": [
+        {
+          "name": "council",
+          "signer": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "asset",
+          "relations": [
+            "bounty"
+          ]
+        },
+        {
+          "name": "bounty",
+          "writable": true
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "terms",
+          "type": {
+            "defined": {
+              "name": "Terms"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "execute",
+      "docs": [
+        "SPL transfer-hook `execute`, called by Token-2022 on every profit-token transfer."
+      ],
+      "discriminator": [
+        105,
+        37,
+        101,
+        197,
+        75,
+        251,
+        102,
+        26
+      ],
+      "accounts": [
+        {
+          "name": "source"
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "destination"
+        },
+        {
+          "name": "authority"
+        },
+        {
+          "name": "extra_metas",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  120,
+                  116,
+                  114,
+                  97,
+                  45,
+                  97,
+                  99,
+                  99,
+                  111,
+                  117,
+                  110,
+                  116,
+                  45,
+                  109,
+                  101,
+                  116,
+                  97,
+                  115
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "asset"
+        },
+        {
+          "name": "source_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "asset"
+              },
+              {
+                "kind": "account",
+                "path": "source.owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "destination_position",
+          "docs": [
+            "Same account as `source_position` when an owner moves tokens between its own accounts."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "asset"
+              },
+              {
+                "kind": "account",
+                "path": "destination.owner"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "freeze_holder",
+      "discriminator": [
+        42,
+        135,
+        144,
+        146,
+        54,
+        1,
+        196,
+        117
+      ],
+      "accounts": [
+        {
+          "name": "asset"
+        },
+        {
+          "name": "owner"
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "token_account",
+          "writable": true
+        },
+        {
+          "name": "attestation",
+          "docs": [
+            "is re-derived and the contents parsed in `sas::standing`."
+          ]
+        },
+        {
+          "name": "credential"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "open_bounty",
+      "discriminator": [
+        70,
+        22,
+        252,
+        7,
+        127,
+        88,
+        222,
+        198
+      ],
+      "accounts": [
+        {
+          "name": "council",
+          "signer": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "asset",
+          "relations": [
+            "bounty"
+          ]
+        },
+        {
+          "name": "bounty",
+          "writable": true
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "open_position",
+      "discriminator": [
+        135,
+        128,
+        47,
+        77,
+        15,
+        152,
+        240,
+        49
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "asset"
+        },
+        {
+          "name": "owner"
+        },
+        {
+          "name": "position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "asset"
+              },
+              {
+                "kind": "account",
+                "path": "owner"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "pause_bounty",
+      "discriminator": [
+        56,
+        234,
+        91,
+        248,
+        106,
+        27,
+        11,
+        85
+      ],
+      "accounts": [
+        {
+          "name": "council",
+          "signer": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "asset",
+          "relations": [
+            "bounty"
+          ]
+        },
+        {
+          "name": "bounty",
+          "writable": true
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "propose_bounty",
+      "discriminator": [
+        194,
+        232,
+        85,
+        107,
+        228,
+        72,
+        135,
+        37
+      ],
+      "accounts": [
+        {
+          "name": "proposer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "asset",
+          "writable": true
+        },
+        {
+          "name": "bounty",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  111,
+                  117,
+                  110,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "asset"
+              },
+              {
+                "kind": "account",
+                "path": "asset.next_bounty_id",
+                "account": "Asset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "attestation"
+        },
+        {
+          "name": "credential"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "kind",
+          "type": {
+            "defined": {
+              "name": "BountyKind"
+            }
+          }
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "spec_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "record_inflow",
+      "discriminator": [
+        66,
+        7,
+        180,
+        208,
+        106,
+        28,
+        58,
+        248
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "signer": true
+        },
+        {
+          "name": "asset",
+          "writable": true
+        },
+        {
+          "name": "contribution_mint",
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "payer_funds",
+          "writable": true
+        },
+        {
+          "name": "income_vault",
+          "writable": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "contribution_token_program"
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "record_outflow",
+      "discriminator": [
+        195,
+        69,
+        151,
+        4,
+        23,
+        79,
+        247,
+        191
+      ],
+      "accounts": [
+        {
+          "name": "council",
+          "signer": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "asset",
+          "writable": true
+        },
+        {
+          "name": "contribution_mint",
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "capital_vault",
+          "writable": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "spe_treasury",
+          "writable": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "contribution_token_program"
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "memo_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "reject_delivery",
+      "discriminator": [
+        36,
+        183,
+        50,
+        167,
+        246,
+        186,
+        10,
+        45
+      ],
+      "accounts": [
+        {
+          "name": "council",
+          "signer": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "asset",
+          "relations": [
+            "bounty"
+          ]
+        },
+        {
+          "name": "bounty",
+          "writable": true
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "resume_bounty",
+      "discriminator": [
+        68,
+        219,
+        166,
+        132,
+        252,
+        198,
+        230,
+        195
+      ],
+      "accounts": [
+        {
+          "name": "council",
+          "signer": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "asset",
+          "relations": [
+            "bounty"
+          ]
+        },
+        {
+          "name": "bounty",
+          "writable": true
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "settle_work",
+      "discriminator": [
+        198,
+        131,
+        33,
+        30,
+        126,
+        51,
+        67,
+        213
+      ],
+      "accounts": [
+        {
+          "name": "asset",
+          "writable": true,
+          "relations": [
+            "bounty"
+          ]
+        },
+        {
+          "name": "bounty",
+          "writable": true
+        },
+        {
+          "name": "claimant",
+          "relations": [
+            "bounty"
+          ]
+        },
+        {
+          "name": "ownership_mint",
+          "writable": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "profit_mint",
+          "writable": true,
+          "relations": [
+            "asset"
+          ]
+        },
+        {
+          "name": "claimant_ownership",
+          "writable": true
+        },
+        {
+          "name": "claimant_profit",
+          "writable": true
+        },
+        {
+          "name": "claimant_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "asset"
+              },
+              {
+                "kind": "account",
+                "path": "claimant"
+              }
+            ]
+          }
+        },
+        {
+          "name": "holding_ownership",
+          "writable": true
+        },
+        {
+          "name": "holding_profit",
+          "writable": true
+        },
+        {
+          "name": "holding_position",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  115,
+                  105,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "asset"
+              },
+              {
+                "kind": "account",
+                "path": "asset.holding",
+                "account": "Asset"
+              }
+            ]
+          }
+        },
+        {
+          "name": "attestation"
+        },
+        {
+          "name": "credential"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "submit_delivery",
+      "discriminator": [
+        217,
+        177,
+        33,
+        54,
+        136,
+        185,
+        123,
+        96
+      ],
+      "accounts": [
+        {
+          "name": "claimant",
+          "signer": true,
+          "relations": [
+            "bounty"
+          ]
+        },
+        {
+          "name": "bounty",
+          "writable": true
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": [
+        {
+          "name": "delivery_hash",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "thaw_holder",
+      "discriminator": [
+        56,
+        60,
+        31,
+        119,
+        186,
+        131,
+        171,
+        109
+      ],
+      "accounts": [
+        {
+          "name": "asset"
+        },
+        {
+          "name": "owner"
+        },
+        {
+          "name": "mint"
+        },
+        {
+          "name": "token_account",
+          "writable": true
+        },
+        {
+          "name": "attestation",
+          "docs": [
+            "is re-derived and the contents parsed in `sas::standing`."
+          ]
+        },
+        {
+          "name": "credential"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "event_authority"
+        },
+        {
+          "name": "program"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Asset",
+      "discriminator": [
+        234,
+        180,
+        241,
+        252,
+        139,
+        224,
+        160,
+        8
+      ]
+    },
+    {
+      "name": "Bounty",
+      "discriminator": [
+        237,
+        16,
+        105,
+        198,
+        19,
+        69,
+        242,
+        234
+      ]
+    },
+    {
+      "name": "Position",
+      "discriminator": [
+        170,
+        188,
+        143,
+        228,
+        122,
+        64,
+        247,
+        208
+      ]
+    },
+    {
+      "name": "Receipt",
+      "discriminator": [
+        39,
+        154,
+        73,
+        106,
+        80,
+        102,
+        145,
+        153
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "AssetCreated",
+      "discriminator": [
+        206,
+        193,
+        252,
+        254,
+        207,
+        185,
+        154,
+        4
+      ]
+    },
+    {
+      "name": "AssetLive",
+      "discriminator": [
+        54,
+        140,
+        144,
+        168,
+        221,
+        58,
+        98,
+        88
+      ]
+    },
+    {
+      "name": "BountyCancelled",
+      "discriminator": [
+        234,
+        186,
+        248,
+        214,
+        198,
+        69,
+        152,
+        23
+      ]
+    },
+    {
+      "name": "BountyClaimed",
+      "discriminator": [
+        140,
+        202,
+        21,
+        51,
+        211,
+        65,
+        142,
+        21
+      ]
+    },
+    {
+      "name": "BountyCurated",
+      "discriminator": [
+        146,
+        247,
+        205,
+        185,
+        193,
+        157,
+        205,
+        91
+      ]
+    },
+    {
+      "name": "BountyOpened",
+      "discriminator": [
+        211,
+        45,
+        110,
+        172,
+        229,
+        249,
+        128,
+        145
+      ]
+    },
+    {
+      "name": "BountyPaused",
+      "discriminator": [
+        220,
+        40,
+        146,
+        7,
+        252,
+        252,
+        69,
+        178
+      ]
+    },
+    {
+      "name": "BountyProposed",
+      "discriminator": [
+        73,
+        24,
+        183,
+        222,
+        217,
+        222,
+        25,
+        97
+      ]
+    },
+    {
+      "name": "BountyResumed",
+      "discriminator": [
+        16,
+        239,
+        136,
+        237,
+        65,
+        12,
+        167,
+        125
+      ]
+    },
+    {
+      "name": "Contributed",
+      "discriminator": [
+        196,
+        199,
+        157,
+        136,
+        180,
+        222,
+        100,
+        118
+      ]
+    },
+    {
+      "name": "DeliveryAccepted",
+      "discriminator": [
+        192,
+        236,
+        23,
+        8,
+        248,
+        226,
+        6,
+        8
+      ]
+    },
+    {
+      "name": "DeliveryRejected",
+      "discriminator": [
+        190,
+        128,
+        122,
+        108,
+        160,
+        167,
+        230,
+        238
+      ]
+    },
+    {
+      "name": "DeliverySubmitted",
+      "discriminator": [
+        104,
+        47,
+        131,
+        41,
+        20,
+        153,
+        87,
+        75
+      ]
+    },
+    {
+      "name": "DistributionClaimed",
+      "discriminator": [
+        28,
+        224,
+        98,
+        55,
+        240,
+        215,
+        209,
+        4
+      ]
+    },
+    {
+      "name": "FundingClosed",
+      "discriminator": [
+        190,
+        26,
+        110,
+        166,
+        120,
+        148,
+        163,
+        71
+      ]
+    },
+    {
+      "name": "HolderFrozen",
+      "discriminator": [
+        173,
+        89,
+        39,
+        29,
+        159,
+        207,
+        112,
+        70
+      ]
+    },
+    {
+      "name": "HolderThawed",
+      "discriminator": [
+        31,
+        139,
+        193,
+        108,
+        22,
+        10,
+        102,
+        147
+      ]
+    },
+    {
+      "name": "InflowRecorded",
+      "discriminator": [
+        186,
+        84,
+        113,
+        173,
+        140,
+        184,
+        228,
+        151
+      ]
+    },
+    {
+      "name": "OutflowRecorded",
+      "discriminator": [
+        136,
+        136,
+        230,
+        222,
+        156,
+        138,
+        74,
+        131
+      ]
+    },
+    {
+      "name": "PositionOpened",
+      "discriminator": [
+        237,
+        175,
+        243,
+        230,
+        147,
+        117,
+        101,
+        121
+      ]
+    },
+    {
+      "name": "WorkSettled",
+      "discriminator": [
+        22,
+        239,
+        197,
+        96,
+        216,
+        210,
+        114,
+        213
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "NotCouncil",
+      "msg": "Only the asset council may perform this action"
+    },
+    {
+      "code": 6001,
+      "name": "AssetNotLive",
+      "msg": "The asset is not live yet"
+    },
+    {
+      "code": 6002,
+      "name": "AssetAlreadyLive",
+      "msg": "The asset mints already exist"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidHoldingBps",
+      "msg": "Holding share must be below 100%"
+    },
+    {
+      "code": 6004,
+      "name": "MetadataTooLong",
+      "msg": "Name, symbol or URI is too long"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidTitle",
+      "msg": "Title is empty or longer than 64 bytes"
+    },
+    {
+      "code": 6006,
+      "name": "WrongMint",
+      "msg": "Mint does not belong to this asset"
+    },
+    {
+      "code": 6007,
+      "name": "WrongHoldingAccount",
+      "msg": "Token account does not belong to the asset holding"
+    },
+    {
+      "code": 6008,
+      "name": "WrongPosition",
+      "msg": "Position does not belong to this holder"
+    },
+    {
+      "code": 6009,
+      "name": "WrongAttestationAddress",
+      "msg": "Attestation account is not the one derived for this holder"
+    },
+    {
+      "code": 6010,
+      "name": "AttestationWrongOwner",
+      "msg": "Attestation is not owned by the Solana Attestation Service"
+    },
+    {
+      "code": 6011,
+      "name": "AttestationMalformed",
+      "msg": "Attestation data is malformed"
+    },
+    {
+      "code": 6012,
+      "name": "AttestationWrongCredential",
+      "msg": "Attestation was issued under another credential"
+    },
+    {
+      "code": 6013,
+      "name": "AttestationWrongSchema",
+      "msg": "Attestation was issued under another schema"
+    },
+    {
+      "code": 6014,
+      "name": "AttestationWrongSubject",
+      "msg": "Attestation names another wallet"
+    },
+    {
+      "code": 6015,
+      "name": "AttestationExpired",
+      "msg": "Attestation has expired"
+    },
+    {
+      "code": 6016,
+      "name": "NotEligible",
+      "msg": "Holder has no valid attestation"
+    },
+    {
+      "code": 6017,
+      "name": "StillEligible",
+      "msg": "Holder still holds a valid attestation"
+    },
+    {
+      "code": 6018,
+      "name": "AlreadyThawed",
+      "msg": "Token account is already thawed"
+    },
+    {
+      "code": 6019,
+      "name": "AlreadyFrozen",
+      "msg": "Token account is already frozen"
+    },
+    {
+      "code": 6020,
+      "name": "HolderFrozen",
+      "msg": "Token account is frozen; thaw it through the eligibility gate first"
+    },
+    {
+      "code": 6021,
+      "name": "InvalidBountyState",
+      "msg": "Bounty is not in the state this action requires"
+    },
+    {
+      "code": 6022,
+      "name": "WrongBountyKind",
+      "msg": "Action does not apply to this kind of bounty"
+    },
+    {
+      "code": 6023,
+      "name": "InvalidReward",
+      "msg": "Work bounty reward must be positive"
+    },
+    {
+      "code": 6024,
+      "name": "InvalidPrice",
+      "msg": "Financial bounty price must have a positive numerator and denominator"
+    },
+    {
+      "code": 6025,
+      "name": "InvalidTarget",
+      "msg": "Financial bounty target must be positive"
+    },
+    {
+      "code": 6026,
+      "name": "InvalidDeadline",
+      "msg": "Deadline is already in the past"
+    },
+    {
+      "code": 6027,
+      "name": "ZeroAmount",
+      "msg": "Contribution must be positive"
+    },
+    {
+      "code": 6028,
+      "name": "ExceedsTarget",
+      "msg": "Contribution exceeds what remains of the bounty target"
+    },
+    {
+      "code": 6029,
+      "name": "DeadlinePassed",
+      "msg": "Contribution deadline has passed"
+    },
+    {
+      "code": 6030,
+      "name": "ZeroTokens",
+      "msg": "Contribution buys zero tokens at this price"
+    },
+    {
+      "code": 6031,
+      "name": "FundsRaised",
+      "msg": "A financial bounty that has raised capital cannot be cancelled; close funding instead"
+    },
+    {
+      "code": 6032,
+      "name": "NotClaimant",
+      "msg": "Only the member who claimed the bounty may deliver it"
+    },
+    {
+      "code": 6033,
+      "name": "EmptyDelivery",
+      "msg": "Delivery hash must not be empty"
+    },
+    {
+      "code": 6034,
+      "name": "NothingToClaim",
+      "msg": "Nothing to claim"
+    },
+    {
+      "code": 6035,
+      "name": "ExceedsCapital",
+      "msg": "Amount exceeds the recorded capital in the vault"
+    },
+    {
+      "code": 6036,
+      "name": "WrongTreasury",
+      "msg": "Outflow destination is not the SPE treasury"
+    },
+    {
+      "code": 6037,
+      "name": "WrongVault",
+      "msg": "Vault is not this asset's vault"
+    },
+    {
+      "code": 6038,
+      "name": "MathOverflow",
+      "msg": "Arithmetic overflow"
+    },
+    {
+      "code": 6039,
+      "name": "NotTransferring",
+      "msg": "Transfer hook was called outside of a transfer"
+    },
+    {
+      "code": 6040,
+      "name": "MutableOwner",
+      "msg": "Token account owner can be reassigned; use an associated token account"
+    },
+    {
+      "code": 6041,
+      "name": "NoHolders",
+      "msg": "Nobody holds profit tokens yet; record income after the first issuance"
+    }
+  ],
+  "types": [
+    {
+      "name": "Asset",
+      "docs": [
+        "One tokenized asset (one SPE). Every policy number lives here, written once from the config file."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "asset_id",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "AssetStatus"
+              }
+            }
+          },
+          {
+            "name": "council",
+            "docs": [
+              "Signs curation, acceptance, pauses and outflows. A Squads vault in every deployment."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "holding",
+            "docs": [
+              "Owner of the holding's token accounts; receives `holding_bps` of every issuance."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "spe_treasury",
+            "docs": [
+              "The only token account capital may leave to (the SPE's account)."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "contribution_mint",
+            "docs": [
+              "USDC on mainnet; a local or devnet mint elsewhere."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "contribution_token_program",
+            "type": "pubkey"
+          },
+          {
+            "name": "capital_vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "income_vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "ownership_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "profit_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "credential",
+            "docs": [
+              "Solana Attestation Service credential and schema the eligibility gate accepts."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "schema",
+            "type": "pubkey"
+          },
+          {
+            "name": "holding_bps",
+            "type": "u16"
+          },
+          {
+            "name": "decimals",
+            "type": "u8"
+          },
+          {
+            "name": "next_bounty_id",
+            "type": "u64"
+          },
+          {
+            "name": "ledger",
+            "type": {
+              "defined": {
+                "name": "Ledger"
+              }
+            }
+          },
+          {
+            "name": "distribution",
+            "type": {
+              "defined": {
+                "name": "Distribution"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AssetCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "council",
+            "type": "pubkey"
+          },
+          {
+            "name": "holding",
+            "type": "pubkey"
+          },
+          {
+            "name": "holding_bps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AssetLive",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "ownership_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "profit_mint",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "AssetStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Created"
+          },
+          {
+            "name": "Live"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Bounty",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "id",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": {
+                "name": "BountyKind"
+              }
+            }
+          },
+          {
+            "name": "state",
+            "type": {
+              "defined": {
+                "name": "BountyState"
+              }
+            }
+          },
+          {
+            "name": "proposer",
+            "type": "pubkey"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "spec_hash",
+            "docs": [
+              "Hash of the off-chain description of the deliverable."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "terms",
+            "type": {
+              "defined": {
+                "name": "Terms"
+              }
+            }
+          },
+          {
+            "name": "raised",
+            "docs": [
+              "Financial: USDC received."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "minted",
+            "docs": [
+              "Asset tokens minted to members by this bounty, holding split excluded."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "claimant",
+            "docs": [
+              "Work: the member who claimed it."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "delivery_hash",
+            "docs": [
+              "Work: hash of what was delivered."
+            ],
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "BountyCancelled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BountyClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty",
+            "type": "pubkey"
+          },
+          {
+            "name": "claimant",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BountyCurated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty",
+            "type": "pubkey"
+          },
+          {
+            "name": "terms",
+            "type": {
+              "defined": {
+                "name": "Terms"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "BountyKind",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Work"
+          },
+          {
+            "name": "Financial"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BountyOpened",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BountyPaused",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BountyProposed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "bounty",
+            "type": "pubkey"
+          },
+          {
+            "name": "id",
+            "type": "u64"
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": {
+                "name": "BountyKind"
+              }
+            }
+          },
+          {
+            "name": "proposer",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BountyResumed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BountyState",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Proposed"
+          },
+          {
+            "name": "Curated"
+          },
+          {
+            "name": "Open"
+          },
+          {
+            "name": "Paused"
+          },
+          {
+            "name": "Claimed"
+          },
+          {
+            "name": "Delivered"
+          },
+          {
+            "name": "Accepted"
+          },
+          {
+            "name": "Rejected"
+          },
+          {
+            "name": "Settled"
+          },
+          {
+            "name": "Cancelled"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Contributed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty",
+            "type": "pubkey"
+          },
+          {
+            "name": "contributor",
+            "type": "pubkey"
+          },
+          {
+            "name": "receipt",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "tokens",
+            "type": "u64"
+          },
+          {
+            "name": "holding_tokens",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CreateAssetArgs",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "asset_id",
+            "type": "u64"
+          },
+          {
+            "name": "council",
+            "type": "pubkey"
+          },
+          {
+            "name": "holding",
+            "type": "pubkey"
+          },
+          {
+            "name": "holding_bps",
+            "type": "u16"
+          },
+          {
+            "name": "decimals",
+            "type": "u8"
+          },
+          {
+            "name": "credential",
+            "type": "pubkey"
+          },
+          {
+            "name": "schema",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DeliveryAccepted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DeliveryRejected",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DeliverySubmitted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty",
+            "type": "pubkey"
+          },
+          {
+            "name": "delivery_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Distribution",
+      "docs": [
+        "Pull-distribution accumulator over profit-token balances the program tracks itself."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "reward_index",
+            "docs": [
+              "Cumulative income per profit-token base unit, scaled by `math::INDEX_SCALE`."
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "tracked_supply",
+            "docs": [
+              "Sum of every `Position::balance`: every profit token ever minted. Burns skip the hook,",
+              "so a burned token keeps its income share with the burner; nobody else's share shrinks."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "carry",
+            "docs": [
+              "Recorded income the index could not yet represent, in index units (amount scaled by",
+              "`math::INDEX_SCALE`). Always below `tracked_supply`; folded into the next inflow."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DistributionClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FundingClosed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty",
+            "type": "pubkey"
+          },
+          {
+            "name": "raised",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HolderFrozen",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": {
+              "defined": {
+                "name": "MintKind"
+              }
+            }
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_account",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "HolderThawed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": {
+              "defined": {
+                "name": "MintKind"
+              }
+            }
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_account",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InflowRecorded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "payer",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "reward_index",
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Ledger",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "contributed",
+            "docs": [
+              "USDC received into the capital vault through `contribute`."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "outflow",
+            "docs": [
+              "USDC sent from the capital vault to the SPE through `record_outflow`."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "income",
+            "docs": [
+              "USDC received into the income vault through `record_inflow`."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "income_claimed",
+            "docs": [
+              "USDC paid from the income vault through `claim_distribution`."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MintKind",
+      "docs": [
+        "Which of the asset's two tokens a mint is. The byte is the PDA seed of the mint."
+      ],
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Ownership"
+          },
+          {
+            "name": "Profit"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OutflowRecorded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "memo_hash",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Position",
+      "docs": [
+        "One holder's share of the profit-token distribution."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "balance",
+            "docs": [
+              "Profit tokens this owner holds across all of their token accounts."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "index",
+            "docs": [
+              "`Distribution::reward_index` at the last settlement."
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "accrued",
+            "docs": [
+              "Income earned and not yet claimed."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "claimed",
+            "docs": [
+              "Income paid out over the position's life."
+            ],
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PositionOpened",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "asset",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Receipt",
+      "docs": [
+        "Receipt of one USDC contribution to a financial bounty."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty",
+            "type": "pubkey"
+          },
+          {
+            "name": "contributor",
+            "type": "pubkey"
+          },
+          {
+            "name": "receipt_id",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "tokens",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Terms",
+      "docs": [
+        "The exchange, fixed at curation and never written again."
+      ],
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "reward",
+            "docs": [
+              "Work: asset tokens (base units, before the holding split) paid on settlement."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "price_num",
+            "docs": [
+              "Financial: asset tokens minted per contribution = amount * price_num / price_den."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "price_den",
+            "type": "u64"
+          },
+          {
+            "name": "target",
+            "docs": [
+              "Financial: most USDC the bounty accepts."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "deadline",
+            "docs": [
+              "Financial: unix time after which contributions are refused; 0 means none."
+            ],
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenMeta",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WorkSettled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bounty",
+            "type": "pubkey"
+          },
+          {
+            "name": "claimant",
+            "type": "pubkey"
+          },
+          {
+            "name": "tokens",
+            "type": "u64"
+          },
+          {
+            "name": "holding_tokens",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}

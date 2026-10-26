@@ -4,14 +4,14 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { DEMO_SEED } from '../clients/ts/src/demo';
-import { CACHAIN_PROGRAM_ADDRESS, holderAccounts, SQUADS_PROGRAM_ADDRESS } from '../clients/ts/src';
+import { FOUNDER_VILLAGE_PROGRAM_ADDRESS, holderAccounts, SQUADS_PROGRAM_ADDRESS } from '../clients/ts/src';
 import { missingArtifacts, SAS_PROGRAM_ADDRESS, startLocalnet } from './localnet';
 import { seed } from './seed';
 
 const step = (text: string) => console.log(`\n▸ ${text}`);
 
 const missing = missingArtifacts();
-if (missing.some((f) => f.endsWith('cachain.so'))) {
+if (missing.some((f) => f.endsWith('founder_village.so'))) {
   step('building the program (anchor build)');
   // --ignore-keys: a fresh clone has no program keypair (git-ignored); declare_id! fixes the ID,
   // and the local deploy loads the binary at that address without a key.
@@ -30,7 +30,7 @@ const { keys, asset } = world;
 const rows: [string, string][] = [
   ['RPC', surfnet.rpcUrl],
   ['WebSocket', surfnet.wsUrl],
-  ['Cachain program', CACHAIN_PROGRAM_ADDRESS],
+  ['Founder Village program', FOUNDER_VILLAGE_PROGRAM_ADDRESS],
   ['SAS program', SAS_PROGRAM_ADDRESS],
   ['Squads program', SQUADS_PROGRAM_ADDRESS],
   ['Asset (Founder Haus)', asset.address],
@@ -83,8 +83,8 @@ const strip = (prefix: string) => (path: string) => path.replace(new RegExp(`^${
 const server = await createServer({
   configFile: 'app/vite.config.ts',
   server: {
-    // CACHAIN_HOST=0.0.0.0 inside Docker; loopback otherwise.
-    host: process.env.CACHAIN_HOST || undefined,
+    // FOUNDER_VILLAGE_HOST=0.0.0.0 inside Docker; loopback otherwise.
+    host: process.env.FOUNDER_VILLAGE_HOST || undefined,
     proxy: {
       '/rpc': { target: surfnet.rpcUrl, changeOrigin: true, rewrite: strip('/rpc') },
       '/ws': { target: surfnet.wsUrl, ws: true, changeOrigin: true, rewrite: strip('/ws') },

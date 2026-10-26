@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Renamed from the working name "Cachain" to **Founder Village**: the Rust crate is
+  `founder_village`, the generated client exports `FOUNDER_VILLAGE_PROGRAM_ADDRESS` and
+  `FounderVillageError` from `clients/ts/src/generated/founder-village`, the npm package is
+  `founder-village`, and the repository is `melocalex/foundervillage`. The program address, the SAS
+  schema name `cachain-member` and the devnet key salt keep the old name, so the live devnet
+  deployment keeps working.
 - Live on devnet. `npm run devnet:seed` seeds the Founder Haus scenario and writes `docs/devnet.md`;
   `npm run devnet:onboard -- <wallet>` whitelists a tester and mints 10,000 test USDC.
 - CI: the formatter config is now in the repository, so the generated client is identical on

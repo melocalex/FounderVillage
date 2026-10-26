@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="660" viewBox="0 0 1280 660" role="img" aria-labelledby="t d">
-  <title id="t">Cachain architecture</title>
-  <desc id="d">Members, the operator, the Squads council and the attestation issuer act on the Cachain program, which controls two Token-2022 mints, two USDC vaults and reads Solana Attestation Service accounts.</desc>
+  <title id="t">Founder Village architecture</title>
+  <desc id="d">Members, the operator, the Squads council and the attestation issuer act on the Founder Village program, which controls two Token-2022 mints, two USDC vaults and reads Solana Attestation Service accounts.</desc>
   <defs>
     <linearGradient id="sol" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#9945FF"/>
@@ -43,7 +43,7 @@
 
   <!-- program -->
   <rect x="380" y="96" width="520" height="464" rx="18" fill="#121A3D" stroke="url(#sol)" stroke-width="2.5"/>
-  <text x="404" y="130" class="h" style="font-size:19px">Cachain program</text>
+  <text x="404" y="130" class="h" style="font-size:19px">Founder Village program</text>
   <text x="572" y="130" class="m">CachxfgQ…QP6S · Anchor 1.2.1</text>
   <g transform="translate(400 146)"><rect class="sub" width="480" height="70" rx="10"/>
     <text x="16" y="26" class="h" style="font-size:15px">Asset</text>

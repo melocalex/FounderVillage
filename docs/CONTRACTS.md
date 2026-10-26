@@ -1,6 +1,6 @@
-<p align="center"><img src="../assets/hero.svg" alt="Cachain" width="100%"></p>
+<p align="center"><img src="../assets/hero.svg" alt="Founder Village" width="100%"></p>
 
-# How the Cachain contracts work
+# How the Founder Village contracts work
 
 **One page for anyone: founders, members, investors, developers.** No Solana knowledge needed.
 For the code, start at the [README](../README.md); for the open questions, [DECISIONS](DECISIONS.md).
@@ -15,14 +15,14 @@ Founder Village builds its neighborhood one **asset** at a time (Founder Haus fi
 lives in its own company (an SPV; in Brazil, an SPE). Members help build it in two ways: by doing **work** (design,
 legal, build, operate) or by bringing **capital** (USDC). Both are **bounties**. When a bounty is
 delivered and accepted, the member receives that asset's tokens. When the asset earns rent, the
-token holders collect their share. Cachain is the program on Solana that enforces those rules, so
+token holders collect their share. The Founder Village program on Solana enforces those rules, so
 they do not depend on anyone's goodwill or spreadsheet.
 
 ## 🧱 The pieces
 
 | Piece | What it is, in plain words |
 |---|---|
-| **The Cachain program** | The contract. One program runs every asset. Address `CachxfgQfNcVhvjGGY5KMTSijdP8SVx4MqDxDniyQP6S`. |
+| **The Founder Village program** | The contract. One program runs every asset. Address `CachxfgQfNcVhvjGGY5KMTSijdP8SVx4MqDxDniyQP6S`. |
 | **Asset** | One record per building or project: its rules (the holding's share, which whitelist, where capital may go) and its books (capital raised, rent received, rent paid out). |
 | **Ownership token** | A claim on the asset itself. |
 | **Profit token** | A claim on the asset's rent. Minted 1:1 with ownership, so a holder can collect income without selling ownership. |

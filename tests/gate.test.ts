@@ -13,14 +13,14 @@ import {
   TOKEN_2022_PROGRAM_ADDRESS,
 } from '@solana-program/token-2022';
 import {
-  CACHAIN_ERROR__ALREADY_THAWED,
-  CACHAIN_ERROR__MUTABLE_OWNER,
-  CACHAIN_ERROR__ATTESTATION_EXPIRED,
-  CACHAIN_ERROR__ATTESTATION_WRONG_CREDENTIAL,
-  CACHAIN_ERROR__NOT_ELIGIBLE,
-  CACHAIN_ERROR__NOT_TRANSFERRING,
-  CACHAIN_ERROR__STILL_ELIGIBLE,
-  CACHAIN_ERROR__WRONG_ATTESTATION_ADDRESS,
+  FOUNDER_VILLAGE_ERROR__ALREADY_THAWED,
+  FOUNDER_VILLAGE_ERROR__MUTABLE_OWNER,
+  FOUNDER_VILLAGE_ERROR__ATTESTATION_EXPIRED,
+  FOUNDER_VILLAGE_ERROR__ATTESTATION_WRONG_CREDENTIAL,
+  FOUNDER_VILLAGE_ERROR__NOT_ELIGIBLE,
+  FOUNDER_VILLAGE_ERROR__NOT_TRANSFERRING,
+  FOUNDER_VILLAGE_ERROR__STILL_ELIGIBLE,
+  FOUNDER_VILLAGE_ERROR__WRONG_ATTESTATION_ADDRESS,
   findExtraMetasPda,
   freezeInstructions,
   getExecuteInstructionAsync,
@@ -51,7 +51,7 @@ describe('eligibility gate', () => {
   it('refuses to thaw a wallet with no attestation', async () => {
     const { world } = ctx;
     const ixs = await joinInstructions(world.client.rpc, world.asset, world.keys.eve.address, world.client.payer);
-    await expectCode(world.send(ixs), CACHAIN_ERROR__NOT_ELIGIBLE);
+    await expectCode(world.send(ixs), FOUNDER_VILLAGE_ERROR__NOT_ELIGIBLE);
   });
 
   it('leaves a non-whitelisted account frozen, so it cannot receive the token', async () => {
@@ -90,7 +90,7 @@ describe('eligibility gate', () => {
       attestation: ana.attestation,
       credential: world.asset.data.credential,
     });
-    await expectCode(world.send([ix]), CACHAIN_ERROR__WRONG_ATTESTATION_ADDRESS);
+    await expectCode(world.send([ix]), FOUNDER_VILLAGE_ERROR__WRONG_ATTESTATION_ADDRESS);
   });
 
   it('refuses a credential other than the pinned one', async () => {
@@ -104,7 +104,7 @@ describe('eligibility gate', () => {
       attestation: ana.attestation,
       credential: world.asset.data.schema,
     });
-    await expectCode(world.send([ix]), CACHAIN_ERROR__ATTESTATION_WRONG_CREDENTIAL);
+    await expectCode(world.send([ix]), FOUNDER_VILLAGE_ERROR__ATTESTATION_WRONG_CREDENTIAL);
   });
 
   it('refuses to thaw an account whose owner could later be reassigned', async () => {
@@ -132,7 +132,7 @@ describe('eligibility gate', () => {
       attestation: ana.attestation,
       credential: world.asset.data.credential,
     });
-    await expectCode(world.send([ix]), CACHAIN_ERROR__MUTABLE_OWNER);
+    await expectCode(world.send([ix]), FOUNDER_VILLAGE_ERROR__MUTABLE_OWNER);
   });
 
   it('refuses to thaw twice', async () => {
@@ -146,13 +146,13 @@ describe('eligibility gate', () => {
       attestation: ana.attestation,
       credential: world.asset.data.credential,
     });
-    await expectCode(world.send([ix]), CACHAIN_ERROR__ALREADY_THAWED);
+    await expectCode(world.send([ix]), FOUNDER_VILLAGE_ERROR__ALREADY_THAWED);
   });
 
   it('refuses to freeze a holder who is still eligible', async () => {
     const { world } = ctx;
     const [ix] = await freezeInstructions(world.asset, world.keys.ana.address);
-    await expectCode(world.send([ix!]), CACHAIN_ERROR__STILL_ELIGIBLE);
+    await expectCode(world.send([ix!]), FOUNDER_VILLAGE_ERROR__STILL_ELIGIBLE);
   });
 
   it('lets anyone freeze a revoked holder; the balance survives and buying stops', async () => {
@@ -167,7 +167,7 @@ describe('eligibility gate', () => {
     expect((await fetchToken(world.client.rpc, ana.ownership)).data.state).toBe(AccountState.Frozen);
     expect((await fetchToken(world.client.rpc, ana.profit)).data.state).toBe(AccountState.Frozen);
     expect(await holdings(world, world.keys.ana.address)).toEqual(before);
-    await expectCode(contribute(world, bounty, world.keys.ana, 1n * USDC), CACHAIN_ERROR__NOT_ELIGIBLE);
+    await expectCode(contribute(world, bounty, world.keys.ana, 1n * USDC), FOUNDER_VILLAGE_ERROR__NOT_ELIGIBLE);
   });
 
   it('thaws again on reinstatement', async () => {
@@ -187,7 +187,7 @@ describe('eligibility gate', () => {
     await world.attest('bruno', expiry);
     await contribute(world, bounty, world.keys.bruno, 10n * USDC);
     setTime(expiry + 1n);
-    await expectCode(contribute(world, bounty, world.keys.bruno, 10n * USDC), CACHAIN_ERROR__ATTESTATION_EXPIRED);
+    await expectCode(contribute(world, bounty, world.keys.bruno, 10n * USDC), FOUNDER_VILLAGE_ERROR__ATTESTATION_EXPIRED);
     await world.client.sendTransaction(await freezeInstructions(world.asset, world.keys.bruno.address));
   });
 
@@ -216,6 +216,6 @@ describe('eligibility gate', () => {
       destinationPosition: holding.position,
       amount: 1_000_000_000n,
     });
-    await expectCode(world.send([ix]), CACHAIN_ERROR__NOT_TRANSFERRING);
+    await expectCode(world.send([ix]), FOUNDER_VILLAGE_ERROR__NOT_TRANSFERRING);
   });
 });

@@ -7,8 +7,8 @@ import { fetchMaybeToken, AccountState } from '@solana-program/token-2022';
 import { fetchMaybeToken as fetchMaybeClassicToken } from '@solana-program/token';
 import { fetchMaybeAttestation } from '@solana/attestation';
 import {
-  CACHAIN_PROGRAM_ADDRESS,
-  CachainInstruction,
+  FOUNDER_VILLAGE_PROGRAM_ADDRESS,
+  FounderVillageInstruction,
   describeError,
   fetchAsset,
   fetchBounty,
@@ -16,7 +16,7 @@ import {
   findBountyPda,
   findCustomError,
   holderAccounts,
-  identifyCachainInstruction,
+  identifyFounderVillageInstruction,
   squadsClient,
   SQUADS_PROGRAM_ADDRESS,
   type LoadedAsset,
@@ -171,9 +171,9 @@ const ROLE = ['readonly', 'writable', 'readonly signer', 'writable signer'];
 
 export function describe(ix: Instruction) {
   let name = '';
-  if (ix.programAddress === CACHAIN_PROGRAM_ADDRESS) {
+  if (ix.programAddress === FOUNDER_VILLAGE_PROGRAM_ADDRESS) {
     try {
-      name = CachainInstruction[identifyCachainInstruction(ix as Instruction & { data: Uint8Array })];
+      name = FounderVillageInstruction[identifyFounderVillageInstruction(ix as Instruction & { data: Uint8Array })];
     } catch {
       name = 'unknown';
     }
@@ -181,8 +181,8 @@ export function describe(ix: Instruction) {
     name = 'multisig';
   }
   const program =
-    ix.programAddress === CACHAIN_PROGRAM_ADDRESS
-      ? 'cachain'
+    ix.programAddress === FOUNDER_VILLAGE_PROGRAM_ADDRESS
+      ? 'founder village'
       : ix.programAddress === SQUADS_PROGRAM_ADDRESS
         ? 'squads'
         : short(ix.programAddress);

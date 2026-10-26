@@ -5,7 +5,7 @@
 import { writeFileSync } from 'node:fs';
 import { lamports, type Address } from '@solana/kit';
 import { getTransferSolInstruction } from '@solana-program/system';
-import { CACHAIN_PROGRAM_ADDRESS } from '../clients/ts/src';
+import { FOUNDER_VILLAGE_PROGRAM_ADDRESS } from '../clients/ts/src';
 import { client, devnetClient, devnetSeed } from './devnet-client';
 import { seed } from './seed';
 import { buildWorld } from './world';
@@ -27,7 +27,7 @@ const { keys, asset } = world;
 
 const link = (a: string) => `[\`${a.slice(0, 4)}…${a.slice(-4)}\`](https://explorer.solana.com/address/${a}?cluster=devnet)`;
 const rows: [string, string][] = [
-  ['Cachain program', CACHAIN_PROGRAM_ADDRESS],
+  ['Founder Village program', FOUNDER_VILLAGE_PROGRAM_ADDRESS],
   ['Asset (Founder Haus)', asset.address],
   ['Ownership mint (FHO)', asset.data.ownershipMint],
   ['Profit mint (FHP)', asset.data.profitMint],

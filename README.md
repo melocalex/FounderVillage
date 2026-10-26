@@ -1,11 +1,11 @@
-<p align="center"><img src="assets/hero.svg" alt="Cachain: real-world assets, owned by the people who build them" width="100%"></p>
+<p align="center"><img src="assets/hero.svg" alt="Founder Village: real-world assets, owned by the people who build them" width="100%"></p>
 <p align="center">
   <b>Members earn a Founder Village asset's tokens by delivering work or capital. Only whitelisted wallets can hold them, and rent paid into the asset is shared among holders on-chain.</b><br>
   <a href="docs/guide/01-run-it.md"><b>Start</b></a> · <a href="docs/CONTRACTS.md">How the contracts work</a> · <a href="docs/guide/00-new-to-solana.md">New to Solana</a> ·
   <a href="AGENTS.md">Frontend handoff</a> · <a href="AGENTS.md#errors">Errors</a> · <a href="docs/DECISIONS.md">Decisions</a> · <a href="docs/ENGINEERING.md">Engineering notes</a>
 </p>
 <p align="center">
-  <a href="https://github.com/melocalex/cachain/actions/workflows/ci.yml"><img src="https://github.com/melocalex/cachain/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/melocalex/foundervillage/actions/workflows/ci.yml"><img src="https://github.com/melocalex/foundervillage/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/Anchor-1.2.1-512BD4" alt="Anchor 1.2.1">
   <img src="https://img.shields.io/badge/Solana_CLI-4.1.2-14F195" alt="Solana CLI 4.1.2">
   <img src="https://img.shields.io/badge/Token--2022-frozen_by_default-9945FF" alt="Token-2022">
@@ -13,9 +13,9 @@
   <img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="Apache-2.0">
 </p>
 
-> **Cachain** is the on-chain protocol behind Founder Village, a curated community of founders in
-> Jurerê Internacional, Florianópolis, building its neighborhood one asset at a time and owning what
-> it builds. Each asset sits in its own SPV. Members deliver **work** or **capital** through
+> **Founder Village** is a curated community of founders in Jurerê Internacional, Florianópolis,
+> building its neighborhood one asset at a time and owning what it builds. This repository is its
+> on-chain protocol on Solana. Each asset sits in its own SPV. Members deliver **work** or **capital** through
 > bounties and receive the asset's tokens only when the delivery is real. **Not technical?** Read
 > [How the contracts work](docs/CONTRACTS.md): one page, no code. **Very technical?** Read
 > [Engineering notes](docs/ENGINEERING.md): the distribution math and its proofs, overflow bounds,
@@ -30,7 +30,7 @@
 
 ```bash
 # 1. Clone
-git clone https://github.com/melocalex/cachain && cd cachain
+git clone https://github.com/melocalex/foundervillage && cd foundervillage
 
 # 2. Install
 npm install --ignore-scripts
@@ -110,13 +110,13 @@ generated client, and every one is exercised by a test you can read top to botto
 
 ## Architecture
 
-<p align="center"><img src="assets/architecture.svg" alt="Members, operator, council and issuer act on the Cachain program, which controls Token-2022 mints and USDC vaults and reads SAS attestations" width="100%"></p>
+<p align="center"><img src="assets/architecture.svg" alt="Members, operator, council and issuer act on the Founder Village program, which controls Token-2022 mints and USDC vaults and reads SAS attestations" width="100%"></p>
 
 | Account | Seeds | Holds |
 |---|---|---|
 | `Asset` | `["asset", creator, asset_id]` | policy numbers from `config/founder-haus.json`, council, holding, pinned SPV treasury, SAS credential and schema, the USDC ledger, the reward index, status |
 | Ownership mint | `["mint", asset, 0]` | Token-2022: `DefaultAccountState = Frozen`, `TransferHook` (no program yet), `MetadataPointer` + `TokenMetadata`; mint and freeze authority = asset |
-| Profit mint | `["mint", asset, 1]` | same, with the transfer hook pointed at Cachain |
+| Profit mint | `["mint", asset, 1]` | same, with the transfer hook pointed at Founder Village |
 | Hook account list | `["extra-account-metas", profit_mint]` | asset, plus the sender's and receiver's positions resolved from each token account's owner |
 | Capital vault | `["capital", asset]` | USDC from contributions; leaves only to the SPV treasury |
 | Income vault | `["income", asset]` | USDC from rent; leaves only as holders' claims |
@@ -162,7 +162,7 @@ An earlier version of the mechanism runs on EVM chains through Juicebox V6 and R
 [Homerun](https://github.com/mejango/homerun) repository). Reading that code taught four lessons;
 each is a deliberate change here:
 
-| Homerun (EVM) | Cachain (Solana) |
+| Homerun (EVM) | Founder Village (Solana) |
 |---|---|
 | Lifecycle is owner-queued configuration; the "phase" is inferred by the app | Every phase change is an instruction with its own signer and its own test |
 | A closed campaign lets a client burn its claim for zero | A forbidden action reverts with a named error |
@@ -178,14 +178,14 @@ npm run gate             # everything CI runs, in order
 docker compose run --rm gate   # the same, in the pinned image
 ```
 
-The suites load `target/deploy/cachain.so` and the fetched SAS and Squads binaries, so run
+The suites load `target/deploy/founder_village.so` and the fetched SAS and Squads binaries, so run
 `npm run dev` once (or `npm run build:program && npm run fixtures:programs`) before calling them
 one by one:
 
 ```bash
 npm test                 # 42 tests in LiteSVM, against the mainnet SAS and Squads binaries
 npm run test:e2e         # the full path on an embedded Surfpool
-cargo test -p cachain    # 6 unit and property tests of the arithmetic
+cargo test -p founder_village    # 6 unit and property tests of the arithmetic
 ```
 
 What they prove, among others: a non-whitelisted wallet cannot be thawed or receive the token; an
@@ -215,8 +215,8 @@ instructions and the full review log are in [docs/ENGINEERING.md](docs/ENGINEERI
 ## What's here
 
 ```text
-cachain/
-├── programs/cachain/      the Anchor program: instructions/, sas.rs, token.rs, math.rs, state.rs
+foundervillage/
+├── programs/founder_village/      the Anchor program: instructions/, sas.rs, token.rs, math.rs, state.rs
 ├── clients/ts/src/        the Kit client: generated/ (Codama), protocol.ts, squads.ts, attestations.ts
 ├── app/                   the test harness
 ├── scripts/               dev, gate, localnet, seed, world, codama, dump-programs
@@ -228,7 +228,7 @@ cachain/
 ├── docs/devnet.md         every devnet address, with explorer links
 ├── ia/                    context and step-by-step guide for AI agents
 ├── config/                the policy numbers of each asset
-├── idl/                   the Cachain IDL and the vendored Squads v4 IDL (MIT)
+├── idl/                   the Founder Village IDL and the vendored Squads v4 IDL (MIT)
 ├── Dockerfile · docker-compose.yml   the pinned environment
 ├── AGENTS.md              the handoff for whoever builds the production frontend
 └── PROMPT.md              the engineering brief this was built against
@@ -259,7 +259,7 @@ taxed as compensation, are in [docs/DECISIONS.md](docs/DECISIONS.md).
 
 ## Disclaimer
 
-Cachain is open-source software. It is not an offer or solicitation to buy any security or token,
+Founder Village is open-source software. It is not an offer or solicitation to buy any security or token,
 and nothing here is legal, tax or financial advice. A token confers no title over a property.
 Founder Village's offering documents are the only description of any offering.
 

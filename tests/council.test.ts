@@ -3,7 +3,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import {
   BountyKind,
   BountyState,
-  CACHAIN_ERROR__NOT_COUNCIL,
+  FOUNDER_VILLAGE_ERROR__NOT_COUNCIL,
   councilAction,
   fetchBounty,
   findBountyPda,
@@ -32,7 +32,7 @@ describe('council', () => {
     getCurateBountyInstructionAsync({ council, asset: ctx.world.asset.address, bounty, terms });
 
   it('refuses curation signed by one member key', async () => {
-    await expectCode(ctx.world.send([await curate(ctx.world.keys.councilA)]), CACHAIN_ERROR__NOT_COUNCIL);
+    await expectCode(ctx.world.send([await curate(ctx.world.keys.councilA)]), FOUNDER_VILLAGE_ERROR__NOT_COUNCIL);
   });
 
   it('refuses to execute a council action with one approval of two', async () => {

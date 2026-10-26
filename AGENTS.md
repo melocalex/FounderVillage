@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Cachain puts a Founder Village asset (an SPV, in Brazil an SPE, that owns a building) on Solana. Each asset has two
+The Founder Village program puts each Founder Village asset (an SPV, in Brazil an SPE, that owns a building) on Solana. Each asset has two
 Token-2022 tokens, **ownership** and **profit**, whose accounts are born frozen: only wallets with a
 live Solana Attestation Service attestation get thawed. Tokens are minted only through **bounties**:
 a financial bounty mints as USDC arrives, a work bounty mints when the council accepts the delivery.
@@ -44,7 +44,7 @@ Builds the program if needed, fetches the SAS and Squads binaries (read-only), b
 Surfpool, deploys, seeds the fixtures below, prints every address, and serves the test harness on
 http://localhost:5183. The RPC URL is written to `app/public/localnet.json`.
 
-Seeded fixtures (deterministic, from the public seed `cachain-localnet-demo-v1` in `clients/ts/src/demo.ts`):
+Seeded fixtures (deterministic, from the public seed `founder-village-localnet-demo-v1` in `clients/ts/src/demo.ts`):
 an eligible funded member (`ana`), an eligible member (`bruno`), a non-whitelisted wallet (`eve`),
 the operator who pays rent, the holding, three council members, the asset with both mints, an open
 tranche with one contribution, an open work bounty, and one claimable distribution.
@@ -53,17 +53,17 @@ tranche with one contribution, an open work bounty, and one claimable distributi
 
 | What | Path |
 |---|---|
-| Generated client (Codama, Kit 8) | `clients/ts/src/generated/cachain`. Import from `clients/ts/src` |
+| Generated client (Codama, Kit 8) | `clients/ts/src/generated/founder-village`. Import from `clients/ts/src` |
 | Account resolution and builders | `clients/ts/src/protocol.ts` (`joinInstructions`, `contributeInstruction`, `claimDistributionInstruction`, …) |
 | Council (Squads) flow | `clients/ts/src/squads.ts` (`councilAction` → `propose`, `approve`, `execute`) |
 | Attestations | `clients/ts/src/attestations.ts` |
-| IDL | `idl/cachain.json` |
+| IDL | `idl/founder_village.json` |
 | Policy numbers | `config/founder-haus.json` |
 | Test harness (reference only) | `app/src/harness.ts`, `app/src/App.tsx` |
 
 ## Program IDs
 
-| Cluster | Cachain | Notes |
+| Cluster | Founder Village | Notes |
 |---|---|---|
 | localnet | `CachxfgQfNcVhvjGGY5KMTSijdP8SVx4MqDxDniyQP6S` | deployed by `npm run dev` |
 | devnet | `CachxfgQfNcVhvjGGY5KMTSijdP8SVx4MqDxDniyQP6S` | deployed; demo asset and every address in [docs/devnet.md](docs/devnet.md) |
@@ -125,7 +125,7 @@ otherwise. `app/src/App.tsx` wires every one of these to a button, so it is a wo
 | **Take on work** | open work bounties and their `terms.reward` | `claimBountyInstruction(asset, bounty, wallet)` | 6021 InvalidBountyState (someone was faster), 6022 WrongBountyKind |
 | **Deliver work** | the bounty, `claimant == wallet` | `getSubmitDeliveryInstructionAsync({ claimant, bounty, deliveryHash })` | 6032 NotClaimant, 6033 EmptyDelivery |
 | **Get paid for work** | bounty state `Accepted` | `settleWorkInstruction(asset, bounty, claimant)` (anyone may send it) | 6016 NotEligible (claimant lapsed), 6020 HolderFrozen |
-| **Council inbox** (members only) | Squads proposals for the multisig (`squadsClient.fetchProposal`) | build the inner instruction with `council: createNoopSigner(vault)`, then `councilAction(rpc, multisig, [ix], member)`: send `propose` (1 tx), then `approve(otherMember)` (1 tx each), then `execute(member)` (1 tx) | Squads 6008 InvalidProposalStatus (not enough approvals), 6005 NotAMember; Cachain errors surface on `execute` |
+| **Council inbox** (members only) | Squads proposals for the multisig (`squadsClient.fetchProposal`) | build the inner instruction with `council: createNoopSigner(vault)`, then `councilAction(rpc, multisig, [ix], member)`: send `propose` (1 tx), then `approve(otherMember)` (1 tx each), then `execute(member)` (1 tx) | Squads 6008 InvalidProposalStatus (not enough approvals), 6005 NotAMember; Founder Village errors surface on `execute` |
 | **My income** | position + asset: `accrued + balance × (rewardIndex − index) / 10^12` | `claimDistributionInstruction(asset, wallet)` | 6034 NothingToClaim, 6016 NotEligible (frozen holder: accrues, claims after reinstatement) |
 | **Send profit tokens** | the recipient's `holderAccounts` (must be joined) | `getTransferCheckedWithTransferHookInstructionAsync(client, { source, mint, destination, authority, amount, decimals })` | Token-2022 17 AccountFrozen (recipient not verified), 3012 (recipient has no position: they must join) |
 | **Operator: pay rent** | — | `recordInflowInstruction(asset, operator, amount)` | 6041 NoHolders |
@@ -195,7 +195,7 @@ extracts the code from any Kit error; `describeError(code)` names it.
 | Bounties | ids `0 … asset.nextBountyId − 1` → `findBountyPda` → `fetchAllBounty` | `kind`, `state`, `title`, `terms`, `raised`, `claimant` |
 | Tranche progress | bounty | `raised / terms.target`, `terms.deadline` (0 = none) |
 | My contributions | `Receipt` accounts: `getProgramAccounts` with a memcmp on `contributor` (offset 40), on a private RPC or an indexer | `amount`, `tokens`, `timestamp` |
-| Activity feed | `#[event_cpi]` events in inner instructions; decode with `identifyCachainEvent` | never parse logs |
+| Activity feed | `#[event_cpi]` events in inner instructions; decode with `identifyFounderVillageEvent` | never parse logs |
 
 All amounts are `bigint` base units (6 decimals for USDC and both asset tokens). Format only at the edge.
 

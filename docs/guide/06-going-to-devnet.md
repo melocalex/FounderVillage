@@ -1,6 +1,6 @@
 # 06 · Going to devnet
 
-**You leave with:** Cachain deployed on devnet, where anyone can inspect it in the explorer.
+**You leave with:** Founder Village deployed on devnet, where anyone can inspect it in the explorer.
 **Time:** ~30 min, most of it waiting for the faucet.
 
 > [!IMPORTANT]
@@ -29,11 +29,11 @@ solana balance
 ## 3. Check the program address
 
 `declare_id!` and `Anchor.toml` say `CachxfgQfNcVhvjGGY5KMTSijdP8SVx4MqDxDniyQP6S`. The deploy key
-in `target/deploy/cachain-keypair.json` must produce that address, or a deploy creates a new
+in `target/deploy/founder_village-keypair.json` must produce that address, or a deploy creates a new
 program somewhere else:
 
 ```bash
-solana address -k target/deploy/cachain-keypair.json
+solana address -k target/deploy/founder_village-keypair.json
 ```
 
 Keep a backup of that file outside the repository (`cargo clean` deletes `target/`). It is

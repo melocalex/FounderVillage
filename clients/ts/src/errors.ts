@@ -1,6 +1,6 @@
 // Finds the program error inside a failed send, whatever layer wrapped it, so tests can assert
 // the exact code and the harness can print its name.
-import idl from '../../../idl/cachain.json';
+import idl from '../../../idl/founder_village.json';
 
 export type ProgramFailure = { instructionIndex: number; code: number };
 
@@ -35,7 +35,7 @@ export function findCustomError(error: unknown): ProgramFailure | undefined {
   return visit(error);
 }
 
-/** `Name: message` for Cachain codes (6000+); other codes come from Anchor, Token-2022 or Squads. */
+/** `Name: message` for Founder Village codes (6000+); other codes come from Anchor, Token-2022 or Squads. */
 export function describeError(code: number): string {
   const e = errors.get(code);
   return e ? `${e.name}: ${e.msg}` : `code ${code} (Anchor, Token-2022 or Squads; see AGENTS.md)`;

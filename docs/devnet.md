@@ -6,7 +6,7 @@ one rent payment. Devnet is a public test network: these tokens have no value.
 
 | What | Address |
 |---|---|
-| Cachain program | [`Cach…QP6S`](https://explorer.solana.com/address/CachxfgQfNcVhvjGGY5KMTSijdP8SVx4MqDxDniyQP6S?cluster=devnet) |
+| Founder Village program | [`Cach…QP6S`](https://explorer.solana.com/address/CachxfgQfNcVhvjGGY5KMTSijdP8SVx4MqDxDniyQP6S?cluster=devnet) |
 | Asset (Founder Haus) | [`Bbfv…oTAf`](https://explorer.solana.com/address/Bbfv1F8DdTeEMZKt3M7FFzPNkGZgMda3UbpMYfGhoTAf?cluster=devnet) |
 | Ownership mint (FHO) | [`9Gy9…yTMP`](https://explorer.solana.com/address/9Gy9G3HN9hY4H818JeVXckPcNBwW6MarRJQWwU2syTMP?cluster=devnet) |
 | Profit mint (FHP) | [`FC3x…K4Xx`](https://explorer.solana.com/address/FC3xScfoeAwqMmtYfeuudZRF6rKGnPUFHUJ9bEoPK4Xx?cluster=devnet) |

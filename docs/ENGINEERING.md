@@ -16,7 +16,7 @@ Every version is exact. Nothing floats on a caret range in the program or the bu
 
 | Layer | Component | Version | Pinned in |
 |---|---|---|---|
-| Program | Anchor (`anchor-lang`, `anchor-spl`, `solana-v3` crates) | `=1.2.1` | `programs/cachain/Cargo.toml` |
+| Program | Anchor (`anchor-lang`, `anchor-spl`, `solana-v3` crates) | `=1.2.1` | `programs/founder_village/Cargo.toml` |
 | Program | Solana CLI / platform tools | 4.1.2 / v1.54 | `Anchor.toml` `[toolchain]` |
 | Program | Rust | MSRV 1.89; host 1.99.1; SBF code compiled by the platform tools | `Cargo.toml` `rust-version` |
 | Program | `spl-transfer-hook-interface` / `spl-tlv-account-resolution` | 2.1 / 0.11 (exact in `Cargo.lock`) | `Cargo.toml` |
@@ -47,13 +47,14 @@ codegen-units = 1
   `MathOverflow` (6038). `overflow-checks` is the second line of defense, not the first.
 - `cargo fmt --check` and `cargo clippy --all-targets --locked -- -D warnings` gate every change.
 - `cargo test --locked`: the lockfile is the dependency graph. CI never resolves a new version.
-- The deployed artifact is 575,360 bytes. SHA-256 of the current local build:
-  `825560bd299396663096d1bcc7fb263ffa6d8779c4091722789ed379343e940a`. This is not yet a verifiable
-  build (see §11).
+- The current build is 575,456 bytes, SHA-256
+  `7464963cbc244dc5e92d1e7bced332d283e589ce59d56e25245b852f50c17cea`. Devnet still runs the build
+  from before the rename to Founder Village (575,360 bytes): same instructions, accounts, seeds and
+  error codes; only the crate name differs. This is not yet a verifiable build (see §11).
 
 ## 3. Account model
 
-One program serves every asset. Every account is a PDA of the Cachain program, so no client can
+One program serves every asset. Every account is a PDA of the Founder Village program, so no client can
 substitute an account the program did not derive.
 
 | Account | Seeds | Size (bytes) | Rent-exempt deposit |
@@ -184,7 +185,7 @@ same bound as the index itself. For scale, the whole USDC supply is of order $10
 
 ### 4.5 Property tests
 
-`proptest`, 256 cases per property by default, in `programs/cachain/src/math.rs`:
+`proptest`, 256 cases per property by default, in `programs/founder_village/src/math.rs`:
 
 | Property | Domain | Asserts |
 |---|---|---|
@@ -247,7 +248,7 @@ against the mainnet Squads binary, so a wrong byte fails execution.
 
 ## 8. Compute budget
 
-Every successful Cachain invocation in the 42 integration tests, parsed from the runtime logs
+Every successful Founder Village invocation in the 42 integration tests, parsed from the runtime logs
 (`Program … consumed N of …`). It includes the CPIs each instruction makes.
 
 | Instruction | Samples | Median CU | Max CU | Devnet median |
@@ -337,7 +338,7 @@ the finding.
 ## 13. Reproduce
 
 ```bash
-cargo test --locked -p cachain                  # §4.5 properties
+cargo test --locked -p founder_village                  # §4.5 properties
 npm run gate                                    # §9, every step
 docker compose run --rm gate                    # §9 in linux/amd64
 npm run devnet:seed                             # §3 sizes, §8 devnet column

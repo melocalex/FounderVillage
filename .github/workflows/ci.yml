@@ -38,15 +38,15 @@ jobs:
       - run: cargo fmt --check
       - run: cargo clippy --all-targets --locked -- -D warnings
       - name: Property tests (host)
-        run: cargo test --locked -p cachain
+        run: cargo test --locked -p founder_village
       # A fresh checkout has no program keypair (it is git-ignored); the ID is fixed by declare_id!.
       - run: anchor build --ignore-keys
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: program
           path: |
-            target/deploy/cachain.so
-            target/idl/cachain.json
+            target/deploy/founder_village.so
+            target/idl/founder_village.json
 
   client:
     needs: program

@@ -8,10 +8,10 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-cachain = "CachxfgQfNcVhvjGGY5KMTSijdP8SVx4MqDxDniyQP6S"
+founder_village = "CachxfgQfNcVhvjGGY5KMTSijdP8SVx4MqDxDniyQP6S"
 
 [programs.devnet]
-cachain = "CachxfgQfNcVhvjGGY5KMTSijdP8SVx4MqDxDniyQP6S"
+founder_village = "CachxfgQfNcVhvjGGY5KMTSijdP8SVx4MqDxDniyQP6S"
 
 [provider]
 cluster = "localnet"

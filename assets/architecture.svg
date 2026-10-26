@@ -59,7 +59,7 @@
     <text x="16" y="50" class="b">member tokens and the holding's share in one instruction</text></g>
   <g transform="translate(400 466)"><rect class="sub" width="480" height="70" rx="10"/>
     <text x="16" y="26" class="h" style="font-size:15px">Distribution</text>
-    <text x="16" y="50" class="b">positions · pull claims · transfer hook keeps balances exact</text></g>
+    <text x="16" y="50" class="b">positions · pull claims · the hook moves balances with transfers</text></g>
 
   <!-- right column -->
   <g transform="translate(980 96)"><rect class="ext" width="260" height="164" rx="14"/>

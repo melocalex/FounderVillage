@@ -1,6 +1,6 @@
-// Test harness. One column, no design: every action shows its instruction, accounts, signature,
-// state before and after, and the program error when it fails. It proves the program works and
-// shows the production frontend the whole error surface. It is not a product.
+// Test harness. It proves the program works and shows the production frontend the whole error
+// surface: every action logs its instructions, signature, what changed on-chain, and the program
+// error when it fails. Nothing here is product UI.
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createClient, createNoopSigner, type Address, type Instruction, type TransactionSigner } from '@solana/kit';
 import { walletWithoutSigner } from '@solana/kit-plugin-wallet';
@@ -13,7 +13,6 @@ import {
   claimDistributionInstruction,
   contributeInstruction,
   councilAction,
-  freezeInstructions,
   getAcceptDeliveryInstructionAsync,
   getCancelBountyInstructionAsync,
   getCloseFundingInstructionAsync,
@@ -27,7 +26,7 @@ import {
   joinInstructions,
   proposeInstruction,
   recordInflowInstruction,
-  revokeInstruction,
+  revokeAndFreezeInstructions,
   settleWorkInstruction,
   type LoadedAsset,
 } from '../../clients/ts/src';
@@ -35,25 +34,43 @@ import { demoSigners, type DemoRole } from '../../clients/ts/src/demo';
 import {
   assertLocal,
   clientFor,
-  holderView,
+  fmt,
+  holderState,
   json,
   listBounties,
   loadAssetState,
   loadLocalnet,
-  plain,
+  proposalState,
   run,
+  short,
+  units,
+  vaultBalances,
+  type Bounty,
+  type HolderState,
   type Localnet,
   type LogEntry,
 } from './harness';
 
-const PERSONAS: DemoRole[] = ['ana', 'bruno', 'eve', 'operator', 'holding', 'councilA', 'councilB', 'councilC', 'issuer'];
-const USDC = 1_000_000n;
+type Persona = { role: DemoRole; label: string; blurb: string; council?: boolean };
+const PERSONAS: Persona[] = [
+  { role: 'ana', label: 'Ana', blurb: 'member, verified' },
+  { role: 'bruno', label: 'Bruno', blurb: 'member, verified' },
+  { role: 'eve', label: 'Eve', blurb: 'not on the whitelist' },
+  { role: 'operator', label: 'Operator', blurb: 'pays rent in' },
+  { role: 'holding', label: 'Holding', blurb: 'receives its share' },
+  { role: 'councilA', label: 'Council A', blurb: 'Squads member', council: true },
+  { role: 'councilB', label: 'Council B', blurb: 'Squads member', council: true },
+  { role: 'councilC', label: 'Council C', blurb: 'Squads member', council: true },
+  { role: 'issuer', label: 'Issuer', blurb: 'attests and revokes' },
+];
+const MEMBERS: DemoRole[] = ['ana', 'bruno', 'eve'];
 const sha256 = async (s: string) => new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)));
-const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`;
-const pre = { fontSize: 12, background: '#f6f6f6', padding: 8, overflowX: 'auto' as const, margin: 0 };
+const STATE_TONE: Record<string, string> = {
+  Proposed: 'muted', Curated: 'info', Open: 'good', Paused: 'warn', Claimed: 'info',
+  Delivered: 'info', Accepted: 'good', Rejected: 'bad', Settled: 'done', Cancelled: 'muted',
+};
 
-type Bounty = Awaited<ReturnType<typeof listBounties>>[number];
-type Pending = { label: string; action: Awaited<ReturnType<typeof councilAction>>; approvals: string[] };
+type Pending = { id: number; label: string; bounty: Address; action: Awaited<ReturnType<typeof councilAction>>; status?: string; approved: Address[] };
 
 export function App() {
   const [net, setNet] = useState<Localnet>();
@@ -61,27 +78,40 @@ export function App() {
   const [who, setWho] = useState<DemoRole>('ana');
   const [wallet, setWallet] = useState<TransactionSigner | null>(null);
   const [asset, setAsset] = useState<LoadedAsset>();
+  const [vaults, setVaults] = useState({ capital: 0n, income: 0n });
+  const [people, setPeople] = useState<Partial<Record<DemoRole, HolderState>>>({});
+  const [me, setMe] = useState<HolderState>();
   const [bounties, setBounties] = useState<Bounty[]>([]);
-  const [selected, setSelected] = useState<Address>();
-  const [view, setView] = useState<unknown>();
+  const [pending, setPending] = useState<Pending[]>([]);
   const [log, setLog] = useState<LogEntry[]>([]);
-  const [pending, setPending] = useState<Pending>();
-  const [fatal, setFatal] = useState<string>();
-  const [amount, setAmount] = useState('1000');
   const [busy, setBusy] = useState(false);
+  const [fatal, setFatal] = useState<string>();
+  const [toast, setToast] = useState<LogEntry>();
 
   const actor = wallet ?? keys?.[who];
-  const read = useMemo(() => (net && actor ? clientFor(net, actor) : undefined), [net, actor]);
+  const read = useMemo(() => (net && keys ? clientFor(net, keys.ana) : undefined), [net, keys]);
+  const nameOf = useCallback(
+    (a: Address) => (keys ? PERSONAS.find((p) => keys[p.role].address === a)?.label : undefined) ?? (a === net?.council ? 'Council vault' : short(a)),
+    [keys, net],
+  );
 
   const refresh = useCallback(async () => {
-    if (!net || !read || !actor) return;
+    if (!net || !read || !keys) return;
     const a = await loadAssetState(read, net);
     setAsset(a);
-    const list = await listBounties(read, a);
-    setBounties(list);
-    setSelected((s) => s ?? list[0]?.address);
-    setView(await holderView(read, a, actor.address));
-  }, [net, read, actor]);
+    setVaults(await vaultBalances(read, a));
+    setBounties(await listBounties(read, a));
+    const states = await Promise.all(MEMBERS.concat('operator', 'holding').map(async (r) => [r, await holderState(read, a, keys[r].address)] as const));
+    setPeople(Object.fromEntries(states));
+    if (actor) setMe(await holderState(read, a, actor.address));
+    setPending(await Promise.all(pendingRef.current.map(async (p) => ({ ...p, ...((await proposalState(read, p.action.proposal)) ?? {}) }))));
+  }, [net, read, keys, actor]);
+
+  // Pending council actions live in a ref so refresh() always sees the latest list.
+  const pendingRef = useMemo(() => ({ current: [] as Pending[] }), []);
+  useEffect(() => {
+    pendingRef.current = pending;
+  }, [pending, pendingRef]);
 
   useEffect(() => {
     (async () => {
@@ -96,40 +126,45 @@ export function App() {
     refresh().catch((e) => setFatal(String(e)));
   }, [refresh]);
 
-  const bounty = bounties.find((b) => b.address === selected);
-
-  /** Sends instructions as `as`, logs the outcome with state before and after. */
+  /** Sends instructions as `as` and logs what changed. */
   const send = async (label: string, build: () => Promise<Instruction[]>, as: TransactionSigner | undefined = actor) => {
-    if (!net || !as || !asset || !read) return;
+    if (!net || !as || !asset || !read || !keys) return;
     setBusy(true);
     try {
       const instructions = await build();
-      const observe = async () =>
-        json({
-          asset: plain((await loadAssetState(read, net)).data),
-          bounty: selected ? (await listBounties(read, asset)).find((b) => b.address === selected) : undefined,
-          holder: await holderView(read, asset, as.address),
-        });
+      const observe = async () => {
+        const a = await loadAssetState(read, net);
+        return {
+          ledger: a.data.ledger,
+          distribution: a.data.distribution,
+          vaults: await vaultBalances(read, a),
+          bounties: Object.fromEntries((await listBounties(read, a)).map((b) => [`#${b.id}`, { state: BountyState[b.state], raised: b.raised, claimant: b.claimant }])),
+          [nameOf(as.address)]: await holderState(read, a, as.address),
+        };
+      };
       const entry = await run(net, as, label, instructions, observe);
       setLog((l) => [entry, ...l]);
+      setToast(entry);
       await refresh();
       return entry;
     } catch (e) {
-      setLog((l) => [{ label, signer: as.address, instructions: [], error: { name: 'client error', message: String(e) } }, ...l]);
+      const entry: LogEntry = { id: Date.now(), at: new Date(), label, signer: as.address, instructions: [], changes: [], error: { name: 'client error', message: String(e) } };
+      setLog((l) => [entry, ...l]);
+      setToast(entry);
     } finally {
       setBusy(false);
     }
   };
 
-  /** Starts a council action: the current persona proposes and records its own approval. */
-  const propose = async (label: string, ix: () => Promise<Instruction>) => {
+  /** Starts a council action: the acting persona proposes it and records its own approval. */
+  const propose = async (label: string, bounty: Address, ix: () => Promise<Instruction>) => {
     if (!net || !read || !actor) return;
     const action = await councilAction(read.rpc, net.multisig, [await ix()], actor);
-    const entry = await send(`council: propose ${label}`, async () => action.propose);
-    if (entry && !entry.error) setPending({ label, action, approvals: [actor.address] });
+    const entry = await send(`council · propose ${label}`, async () => action.propose);
+    if (entry && !entry.error) setPending((p) => [...p, { id: Date.now(), label, bounty, action, approved: [actor.address] }]);
   };
 
-  const council = () => ({ council: createNoopSigner(net!.council), asset: asset!.address, bounty: selected! });
+  const council = (bounty: Address) => ({ council: createNoopSigner(net!.council), asset: asset!.address, bounty });
 
   const connectWallet = async () => {
     const c = createClient().use(walletWithoutSigner({ chain: 'solana:localnet' }));
@@ -142,133 +177,320 @@ export function App() {
     setWallet(connected.signer as unknown as TransactionSigner);
   };
 
-  if (fatal) return <pre style={{ ...pre, color: '#a00' }}>{fatal}</pre>;
-  if (!net || !keys || !asset) return <p>Loading localnet…</p>;
+  if (fatal) return <div className="fatal">{fatal}</div>;
+  if (!net || !keys || !asset || !actor) return <div className="loading">Starting the harness…</div>;
   const a = asset.data;
+  const persona = PERSONAS.find((p) => p.role === who)!;
+  const actorName = wallet ? 'Wallet' : persona.label;
 
   return (
-    <main style={{ fontFamily: 'ui-monospace, monospace', maxWidth: 960, margin: '0 auto', padding: 16 }}>
-      <h1 style={{ fontSize: 18 }}>Cachain test harness (localnet)</h1>
-      <p style={{ background: '#fff3cd', padding: 8, fontSize: 13 }}>
-        Demo personas sign with keys derived from a public seed. They exist only in this harness and refuse to run against
-        mainnet, devnet or testnet. The production frontend signs with a wallet.
+    <div className="app">
+      <header className="top">
+        <div className="brand">
+          <span className="logo">◆</span> Cachain <span className="sub">test harness</span>
+        </div>
+        <div className="chips">
+          <span className="chip good">localnet · Surfpool</span>
+          <span className="chip" title={asset.address}>asset {short(asset.address)}</span>
+          <span className="chip" title={net.council}>council {short(net.council)}</span>
+          <button className="ghost" onClick={() => refresh()} disabled={busy}>↻ refresh</button>
+        </div>
+      </header>
+      <p className="notice">
+        Demo personas sign with keys from a public seed, only on a local cluster. The production frontend signs with a wallet and uses the same calls: see <code>AGENTS.md</code>.
       </p>
 
-      <section>
-        <h2 style={{ fontSize: 15 }}>Acting as</h2>
-        {PERSONAS.map((p) => (
-          <button key={p} disabled={busy} onClick={() => (setWallet(null), setWho(p))} style={{ fontWeight: !wallet && who === p ? 'bold' : undefined, marginRight: 4 }}>
-            {p}
+      <div className="layout">
+        <aside className="col personas">
+          <h2>Act as</h2>
+          {PERSONAS.map((p) => {
+            const s = people[p.role];
+            const active = !wallet && who === p.role;
+            return (
+              <button key={p.role} className={`persona ${active ? 'active' : ''}`} onClick={() => (setWallet(null), setWho(p.role))} disabled={busy}>
+                <span className="avatar">{p.label[0]}</span>
+                <span className="who">
+                  <b>{p.label}</b>
+                  <small>{p.blurb}</small>
+                  {s && (
+                    <span className="badges">
+                      <Badge tone={s.attestation.status === 'verified' ? 'good' : s.attestation.status === 'expired' ? 'warn' : 'bad'}>
+                        {s.attestation.status === 'none' ? 'not verified' : s.attestation.status}
+                      </Badge>
+                      {s.profit.state !== 'none' && <Badge tone={s.profit.state === 'thawed' ? 'good' : 'warn'}>{s.profit.state}</Badge>}
+                    </span>
+                  )}
+                </span>
+              </button>
+            );
+          })}
+          <button className="persona" onClick={connectWallet} disabled={busy}>
+            <span className="avatar">W</span>
+            <span className="who"><b>Connect wallet</b><small>Wallet Standard, needs tx v1</small></span>
           </button>
-        ))}
-        <button onClick={connectWallet} disabled={busy}>connect wallet</button>
-        <pre style={pre}>{JSON.stringify(view, null, 2)}</pre>
-      </section>
+        </aside>
 
-      <section>
-        <h2 style={{ fontSize: 15 }}>Asset {asset.address}</h2>
-        <pre style={pre}>{JSON.stringify(json({ ledger: a.ledger, distribution: a.distribution, council: a.council, holding: a.holding, holdingBps: a.holdingBps, ownershipMint: a.ownershipMint, profitMint: a.profitMint }), null, 2)}</pre>
-      </section>
+        <main className="col main">
+          <section className="stats">
+            <Stat label="Capital raised" value={`${fmt(a.ledger.contributed)} USDC`} hint={`vault ${fmt(vaults.capital)} · sent to SPE ${fmt(a.ledger.outflow)}`} />
+            <Stat label="Rent recorded" value={`${fmt(a.ledger.income)} USDC`} hint={`claimed ${fmt(a.ledger.incomeClaimed)} · vault ${fmt(vaults.income)}`} />
+            <Stat label="Profit tokens tracked" value={fmt(a.distribution.trackedSupply)} hint={`reward index ${a.distribution.rewardIndex.toString()}`} />
+            <Stat label="Holding share" value={`${a.holdingBps / 100}%`} hint="of every issuance" />
+          </section>
 
-      <section>
-        <h2 style={{ fontSize: 15 }}>Bounties</h2>
-        <table style={{ fontSize: 12, borderCollapse: 'collapse', width: '100%' }}>
-          <tbody>
-            {bounties.map((b) => (
-              <tr key={b.address} onClick={() => setSelected(b.address)} style={{ cursor: 'pointer', background: b.address === selected ? '#e8f0ff' : undefined }}>
-                <td>#{String(b.id)}</td>
-                <td>{BountyKind[b.kind]}</td>
-                <td>{BountyState[b.state]}</td>
-                <td>{b.title}</td>
-                <td>{b.kind === BountyKind.Financial ? `${b.raised / USDC} / ${b.terms.target / USDC} USDC` : `reward ${b.terms.reward / USDC}`}</td>
-                <td>{short(b.address)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-
-      <section>
-        <h2 style={{ fontSize: 15 }}>Actions</h2>
-        <label>
-          amount (USDC or tokens) <input value={amount} onChange={(e) => setAmount(e.target.value)} size={10} />
-        </label>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 8 }}>
-          <button disabled={busy} onClick={() => send('join: open position + thaw', () => joinInstructions(read!.rpc, asset, actor!.address, actor!))}>join (thaw)</button>
-          <button disabled={busy || !bounty} onClick={() => send('contribute', async () => [await contributeInstruction(asset, selected!, actor!, BigInt(amount) * USDC, BigInt(Date.now()))])}>fund selected bounty</button>
-          <button disabled={busy} onClick={() => send('propose work bounty', async () => [await proposeInstruction(asset, actor!, BountyKind.Work, `Work bounty ${a.nextBountyId}`, await sha256(String(Date.now())))])}>propose work bounty</button>
-          <button disabled={busy} onClick={() => send('propose financial bounty', async () => [await proposeInstruction(asset, actor!, BountyKind.Financial, `Tranche ${a.nextBountyId}`, await sha256(String(Date.now())))])}>propose financial bounty</button>
-          <button disabled={busy || !bounty} onClick={() => send('claim bounty', async () => [await claimBountyInstruction(asset, selected!, actor!)])}>claim work bounty</button>
-          <button disabled={busy || !bounty} onClick={() => send('submit delivery', async () => [await getSubmitDeliveryInstructionAsync({ claimant: actor!, bounty: selected!, deliveryHash: await sha256(`delivery ${Date.now()}`) })])}>submit delivery</button>
-          <button disabled={busy || !bounty} onClick={() => send('settle work', async () => [await settleWorkInstruction(asset, selected!, bounty!.claimant)])}>settle work</button>
-          <button disabled={busy} onClick={() => send('record inflow', async () => [await recordInflowInstruction(asset, actor!, BigInt(amount) * USDC)])}>record inflow (rent)</button>
-          <button disabled={busy} onClick={() => send('claim distribution', async () => [await claimDistributionInstruction(asset, actor!)])}>claim distribution</button>
-          {(['ana', 'bruno', 'eve'] as DemoRole[]).map((to) => (
-            <button key={to} disabled={busy} onClick={() => send(`transfer profit tokens to ${to}`, async () => {
-              const from = await holderAccounts(asset, actor!.address);
-              const dest = await holderAccounts(asset, keys[to].address);
-              return [await getTransferCheckedWithTransferHookInstructionAsync(read!, { source: from.profit, mint: a.profitMint, destination: dest.profit, authority: actor!, amount: BigInt(amount) * USDC, decimals: a.decimals })];
-            })}>send FHP to {to}</button>
-          ))}
-        </div>
-
-        <h3 style={{ fontSize: 13 }}>Issuer and enforcement</h3>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-          {(['ana', 'bruno', 'eve'] as DemoRole[]).map((p) => (
-            <span key={p}>
-              <button disabled={busy} onClick={() => send(`attest ${p}`, async () => [await attestInstruction(keys.issuer, keys.issuer, a.credential, a.schema, keys[p].address, await sha256(`kyc:${p}`), 0n)], keys.issuer)}>attest {p}</button>
-              <button disabled={busy} onClick={() => send(`revoke ${p}`, async () => [await revokeInstruction(keys.issuer, keys.issuer, a.credential, a.schema, keys[p].address)], keys.issuer)}>revoke {p}</button>
-              <button disabled={busy} onClick={() => send(`freeze ${p} (anyone)`, () => freezeInstructions(asset, keys[p].address))}>freeze {p}</button>
-            </span>
-          ))}
-        </div>
-
-        <h3 style={{ fontSize: 13 }}>Council (2-of-3 Squads vault {short(net.council)})</h3>
-        <p style={{ fontSize: 12 }}>Act as councilA, B or C. One member proposes, a second approves, any member executes.</p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-          <button disabled={busy || !bounty} onClick={() => propose('curate', () => getCurateBountyInstructionAsync({ ...council(), terms: bounty!.kind === BountyKind.Work ? { reward: BigInt(amount) * USDC, priceNum: 0n, priceDen: 0n, target: 0n, deadline: 0n } : { reward: 0n, priceNum: 1n, priceDen: 1n, target: BigInt(amount) * USDC, deadline: 0n } }))}>curate (amount = reward or target)</button>
-          <button disabled={busy || !bounty} onClick={() => propose('open', () => getOpenBountyInstructionAsync(council()))}>open</button>
-          <button disabled={busy || !bounty} onClick={() => propose('accept delivery', () => getAcceptDeliveryInstructionAsync(council()))}>accept</button>
-          <button disabled={busy || !bounty} onClick={() => propose('reject delivery', () => getRejectDeliveryInstructionAsync(council()))}>reject</button>
-          <button disabled={busy || !bounty} onClick={() => propose('pause', () => getPauseBountyInstructionAsync(council()))}>pause</button>
-          <button disabled={busy || !bounty} onClick={() => propose('resume', () => getResumeBountyInstructionAsync(council()))}>resume</button>
-          <button disabled={busy || !bounty} onClick={() => propose('close funding', () => getCloseFundingInstructionAsync(council()))}>close funding</button>
-          <button disabled={busy || !bounty} onClick={() => propose('cancel', () => getCancelBountyInstructionAsync(council()))}>cancel</button>
-          <button disabled={busy || !bounty} onClick={() => send('curate signed by one member (must fail)', async () => [await getCurateBountyInstructionAsync({ council: actor!, asset: asset.address, bounty: selected!, terms: { reward: 1n, priceNum: 0n, priceDen: 0n, target: 0n, deadline: 0n } })])}>try with one key</button>
-        </div>
-        {pending && (
-          <p style={{ fontSize: 12 }}>
-            Pending: <b>{pending.label}</b> (transaction #{String(pending.action.index)}), approved by {pending.approvals.map(short).join(', ')}{' '}
-            <button disabled={busy} onClick={async () => {
-              const e = await send(`council: approve ${pending.label}`, async () => [pending.action.approve(actor!)]);
-              if (e && !e.error) setPending({ ...pending, approvals: [...pending.approvals, actor!.address] });
-            }}>approve as {who}</button>{' '}
-            <button disabled={busy} onClick={async () => {
-              const e = await send(`council: execute ${pending.label}`, async () => [pending.action.execute(actor!)]);
-              if (e && !e.error) setPending(undefined);
-            }}>execute</button>
-          </p>
-        )}
-      </section>
-
-      <section>
-        <h2 style={{ fontSize: 15 }}>Log</h2>
-        {log.map((e, i) => (
-          <details key={i} open={i === 0} style={{ borderTop: '1px solid #ddd', padding: '4px 0' }}>
-            <summary style={{ color: e.error ? '#a00' : '#060' }}>
-              {e.error ? '✗' : '✓'} {e.label} as {short(e.signer)}
-              {e.error && ` — ${e.error.name}`}
-              {e.signature && <> — <a href={e.explorer} target="_blank" rel="noreferrer">{short(e.signature)}</a></>}
-            </summary>
-            {e.error && <pre style={{ ...pre, color: '#a00' }}>{`code: ${e.error.code ?? '—'}\n${e.error.message}`}</pre>}
-            <pre style={pre}>{JSON.stringify(e.instructions, null, 2)}</pre>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 4 }}>
-              <pre style={pre}>before {JSON.stringify(e.before, null, 2)}</pre>
-              <pre style={pre}>after {JSON.stringify(e.after, null, 2)}</pre>
+          <section className="card you">
+            <div className="card-head">
+              <h2>{actorName}</h2>
+              <span className="mono">{short(actor.address)}</span>
             </div>
-          </details>
-        ))}
-      </section>
-    </main>
+            {me && (
+              <>
+                <div className="facts">
+                  <Fact label="Whitelist" value={me.attestation.status === 'none' ? 'not verified' : me.attestation.status} tone={me.attestation.status === 'verified' ? 'good' : 'bad'} />
+                  <Fact label="Ownership (FHO)" value={me.ownership.state === 'none' ? 'no account' : `${fmt(me.ownership.amount)} · ${me.ownership.state}`} tone={me.ownership.state === 'thawed' ? 'good' : 'warn'} />
+                  <Fact label="Profit (FHP)" value={me.profit.state === 'none' ? 'no account' : `${fmt(me.profit.amount)} · ${me.profit.state}`} tone={me.profit.state === 'thawed' ? 'good' : 'warn'} />
+                  <Fact label="USDC" value={fmt(me.usdc)} />
+                  <Fact label="Claimable rent" value={`${fmt(me.claimable)} USDC`} tone={me.claimable > 0n ? 'good' : undefined} />
+                </div>
+                <div className="actions">
+                  <button disabled={busy} onClick={() => send('join: open position, thaw both accounts', () => joinInstructions(read!.rpc, asset, actor.address, actor))}>Join (thaw accounts)</button>
+                  <button disabled={busy} onClick={() => send('claim distribution', async () => [await claimDistributionInstruction(asset, actor)])}>Claim rent</button>
+                  <AmountAction label="Send FHP to" options={MEMBERS.filter((m) => keys[m].address !== actor.address)} busy={busy} onRun={async (amount, to) => {
+                    await send(`send ${amount} FHP to ${to}`, async () => {
+                      const from = await holderAccounts(asset, actor.address);
+                      const dest = await holderAccounts(asset, keys[to as DemoRole].address);
+                      return [await getTransferCheckedWithTransferHookInstructionAsync(read!, { source: from.profit, mint: a.profitMint, destination: dest.profit, authority: actor, amount: units(amount), decimals: a.decimals })];
+                    });
+                  }} />
+                </div>
+              </>
+            )}
+          </section>
+
+          <section className="card">
+            <div className="card-head">
+              <h2>Bounties</h2>
+              <ProposeForm busy={busy} onPropose={(kind, title, spec) => send(`propose ${BountyKind[kind].toLowerCase()} bounty`, async () => [await proposeInstruction(asset, actor, kind, title, await sha256(spec))])} />
+            </div>
+            <div className="board">
+              {bounties.map((b) => (
+                <BountyCard key={b.address} b={b} busy={busy} actor={actor} nameOf={nameOf}
+                  onFund={(amt) => send(`contribute ${amt} USDC to #${b.id}`, async () => [await contributeInstruction(asset, b.address, actor, units(amt), BigInt(Date.now()))])}
+                  onClaim={() => send(`claim bounty #${b.id}`, async () => [await claimBountyInstruction(asset, b.address, actor)])}
+                  onDeliver={(text) => send(`submit delivery for #${b.id}`, async () => [await getSubmitDeliveryInstructionAsync({ claimant: actor, bounty: b.address, deliveryHash: await sha256(text) })])}
+                  onSettle={() => send(`settle work #${b.id}`, async () => [await settleWorkInstruction(asset, b.address, b.claimant)])}
+                  onCouncil={(label, ix) => propose(`${label} #${b.id}`, b.address, ix)}
+                  onSingleKey={() => send(`curate #${b.id} with one key (must fail)`, async () => [await getCurateBountyInstructionAsync({ council: actor, asset: asset.address, bounty: b.address, terms: { reward: 1n, priceNum: 0n, priceDen: 0n, target: 0n, deadline: 0n } })])}
+                  council={council}
+                />
+              ))}
+            </div>
+          </section>
+
+          <section className="card">
+            <div className="card-head">
+              <h2>Council inbox</h2>
+              <span className="muted">2-of-3 Squads vault · one member proposes, a second approves, anyone of them executes</span>
+            </div>
+            {pending.length === 0 && <p className="muted">No open proposals. Act as a council member and use a bounty's council actions.</p>}
+            {pending.map((p) => (
+              <div key={p.id} className="proposal">
+                <div>
+                  <b>{p.label}</b> <span className="mono">tx #{String(p.action.index)}</span>
+                  <div className="muted">
+                    {p.status ?? 'Active'} · approved by {p.approved.map(nameOf).join(', ') || 'nobody'} ({p.approved.length}/2)
+                  </div>
+                </div>
+                <div className="actions">
+                  <button disabled={busy || p.status === 'Executed'} onClick={() => send(`council · approve ${p.label}`, async () => [p.action.approve(actor)])}>Approve as {actorName}</button>
+                  <button className="primary" disabled={busy || p.status === 'Executed'} onClick={async () => {
+                    const e = await send(`council · execute ${p.label}`, async () => [p.action.execute(actor)]);
+                    if (e && !e.error) setPending((list) => list.filter((x) => x.id !== p.id));
+                  }}>Execute</button>
+                </div>
+              </div>
+            ))}
+          </section>
+
+          <section className="card tools">
+            <div>
+              <h3>Issuer</h3>
+              {MEMBERS.map((m) => (
+                <div key={m} className="row">
+                  <span>{PERSONAS.find((p) => p.role === m)!.label}</span>
+                  <button disabled={busy} onClick={() => send(`attest ${m}`, async () => [await attestInstruction(keys.issuer, keys.issuer, a.credential, a.schema, keys[m].address, await sha256(`kyc:${m}`), 0n)], keys.issuer)}>Attest</button>
+                  <button disabled={busy} onClick={() => send(`revoke and freeze ${m}`, () => revokeAndFreezeInstructions(asset, keys.issuer, keys.issuer, keys[m].address), keys.issuer)}>Revoke + freeze</button>
+                </div>
+              ))}
+            </div>
+            <div>
+              <h3>Operator</h3>
+              <AmountAction label="Record rent (USDC)" busy={busy} onRun={(amount) => send(`record inflow ${amount} USDC`, async () => [await recordInflowInstruction(asset, keys.operator, units(amount))], keys.operator)} />
+            </div>
+          </section>
+        </main>
+
+        <aside className="col timeline">
+          <h2>Activity</h2>
+          {log.length === 0 && <p className="muted">Every transaction you send lands here: its instructions, signature, what changed, and the exact error when it fails.</p>}
+          {log.map((e) => <Entry key={e.id} e={e} nameOf={nameOf} />)}
+        </aside>
+      </div>
+
+      {toast && (
+        <div className={`toast ${toast.error ? 'bad' : 'good'}`} onAnimationEnd={() => setToast(undefined)}>
+          {toast.error ? `✗ ${toast.label}: ${toast.error.name}` : `✓ ${toast.label}`}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Badge({ tone, children }: { tone?: string; children: React.ReactNode }) {
+  return <span className={`badge ${tone ?? ''}`}>{children}</span>;
+}
+
+function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  return (
+    <div className="stat">
+      <small>{label}</small>
+      <b>{value}</b>
+      {hint && <span className="muted">{hint}</span>}
+    </div>
+  );
+}
+
+function Fact({ label, value, tone }: { label: string; value: string; tone?: string }) {
+  return (
+    <div className="fact">
+      <small>{label}</small>
+      <span className={tone ? `tone-${tone}` : ''}>{value}</span>
+    </div>
+  );
+}
+
+function AmountAction({ label, options, busy, onRun }: { label: string; options?: string[]; busy: boolean; onRun: (amount: string, option?: string) => void }) {
+  const [amount, setAmount] = useState('100');
+  const [option, setOption] = useState(options?.[0]);
+  return (
+    <span className="inline">
+      <input value={amount} onChange={(e) => setAmount(e.target.value)} size={7} />
+      {options && (
+        <select value={option} onChange={(e) => setOption(e.target.value)}>
+          {options.map((o) => <option key={o}>{o}</option>)}
+        </select>
+      )}
+      <button disabled={busy} onClick={() => onRun(amount, option)}>{label}{options ? '' : ''}</button>
+    </span>
+  );
+}
+
+function ProposeForm({ busy, onPropose }: { busy: boolean; onPropose: (kind: BountyKind, title: string, spec: string) => void }) {
+  const [kind, setKind] = useState(BountyKind.Work);
+  const [title, setTitle] = useState('Solar canopy on the rooftop');
+  return (
+    <span className="inline">
+      <select value={kind} onChange={(e) => setKind(Number(e.target.value))}>
+        <option value={BountyKind.Work}>work</option>
+        <option value={BountyKind.Financial}>financial</option>
+      </select>
+      <input value={title} onChange={(e) => setTitle(e.target.value)} size={26} />
+      <button disabled={busy} onClick={() => onPropose(kind, title, `${title} · ${Date.now()}`)}>Propose a gap</button>
+    </span>
+  );
+}
+
+function BountyCard(props: {
+  b: Bounty;
+  busy: boolean;
+  actor: TransactionSigner;
+  nameOf: (a: Address) => string;
+  onFund: (amount: string) => void;
+  onClaim: () => void;
+  onDeliver: (text: string) => void;
+  onSettle: () => void;
+  onCouncil: (label: string, ix: () => Promise<Instruction>) => void;
+  onSingleKey: () => void;
+  council: (bounty: Address) => { council: TransactionSigner; asset: Address; bounty: Address };
+}) {
+  const { b, busy } = props;
+  const [amount, setAmount] = useState(b.kind === BountyKind.Work ? '2500' : '1000');
+  const state = BountyState[b.state];
+  const financial = b.kind === BountyKind.Financial;
+  const pct = financial && b.terms.target > 0n ? Number((b.raised * 1000n) / b.terms.target) / 10 : 0;
+  const c = props.council(b.address);
+  const terms = financial
+    ? { reward: 0n, priceNum: 1n, priceDen: 1n, target: units(amount), deadline: 0n }
+    : { reward: units(amount), priceNum: 0n, priceDen: 0n, target: 0n, deadline: 0n };
+  return (
+    <div className="bounty">
+      <div className="bounty-head">
+        <span className="kind">{financial ? '💵' : '🛠'} #{String(b.id)}</span>
+        <Badge tone={STATE_TONE[state]}>{state}</Badge>
+      </div>
+      <b className="title">{b.title}</b>
+      {financial ? (
+        <>
+          <div className="bar"><span style={{ width: `${Math.min(pct, 100)}%` }} /></div>
+          <small className="muted">{fmt(b.raised)} / {fmt(b.terms.target)} USDC · {b.terms.priceNum.toString()}:{b.terms.priceDen.toString()} tokens per USDC{b.terms.deadline ? ` · until ${new Date(Number(b.terms.deadline) * 1000).toISOString().slice(0, 10)}` : ''}</small>
+        </>
+      ) : (
+        <small className="muted">
+          reward {b.terms.reward ? `${fmt(b.terms.reward)} FHO + FHP` : 'not curated yet'}
+          {b.claimant !== '11111111111111111111111111111111' ? ` · claimed by ${props.nameOf(b.claimant)}` : ''}
+        </small>
+      )}
+      <div className="actions">
+        {financial && state === 'Open' && <><input value={amount} onChange={(e) => setAmount(e.target.value)} size={7} /><button className="primary" disabled={busy} onClick={() => props.onFund(amount)}>Fund (USDC)</button></>}
+        {!financial && state === 'Open' && <button className="primary" disabled={busy} onClick={props.onClaim}>Claim</button>}
+        {state === 'Claimed' && <button className="primary" disabled={busy} onClick={() => props.onDeliver(`delivery for ${b.title} · ${Date.now()}`)}>Submit delivery</button>}
+        {state === 'Accepted' && <button className="primary" disabled={busy} onClick={props.onSettle}>Settle (anyone)</button>}
+      </div>
+      <div className="actions council-actions">
+        {state === 'Proposed' && <><input value={amount} onChange={(e) => setAmount(e.target.value)} size={7} title={financial ? 'target, USDC' : 'reward, tokens'} /><button disabled={busy} onClick={() => props.onCouncil('curate', () => getCurateBountyInstructionAsync({ ...c, terms }))}>Curate</button></>}
+        {state === 'Curated' && <button disabled={busy} onClick={() => props.onCouncil('open', () => getOpenBountyInstructionAsync(c))}>Open</button>}
+        {state === 'Open' && financial && <button disabled={busy} onClick={() => props.onCouncil('pause', () => getPauseBountyInstructionAsync(c))}>Pause</button>}
+        {state === 'Paused' && <button disabled={busy} onClick={() => props.onCouncil('resume', () => getResumeBountyInstructionAsync(c))}>Resume</button>}
+        {financial && (state === 'Open' || state === 'Paused') && <button disabled={busy} onClick={() => props.onCouncil('close funding', () => getCloseFundingInstructionAsync(c))}>Close</button>}
+        {state === 'Delivered' && <><button disabled={busy} onClick={() => props.onCouncil('accept', () => getAcceptDeliveryInstructionAsync(c))}>Accept</button><button disabled={busy} onClick={() => props.onCouncil('reject', () => getRejectDeliveryInstructionAsync(c))}>Reject</button></>}
+        {['Proposed', 'Curated', 'Open', 'Claimed'].includes(state) && <button disabled={busy} onClick={() => props.onCouncil('cancel', () => getCancelBountyInstructionAsync(c))}>Cancel</button>}
+        {state === 'Proposed' && <button className="ghost" disabled={busy} onClick={props.onSingleKey} title="Signs with the acting persona instead of the vault">one key?</button>}
+        <span className="via">council · via Squads</span>
+      </div>
+    </div>
+  );
+}
+
+function Entry({ e, nameOf }: { e: LogEntry; nameOf: (a: Address) => string }) {
+  const [raw, setRaw] = useState(false);
+  return (
+    <div className={`entry ${e.error ? 'bad' : 'good'}`}>
+      <div className="entry-head">
+        <span className="icon">{e.error ? '✗' : '✓'}</span>
+        <b>{e.label}</b>
+      </div>
+      <div className="muted">
+        {nameOf(e.signer)} · {e.at.toLocaleTimeString()}
+        {e.signature && <> · <a href={e.explorer} target="_blank" rel="noreferrer">{short(e.signature)}</a></>}
+      </div>
+      <div className="ixs">{e.instructions.map((ix, i) => <span key={i} className="chip">{ix.program}{ix.name ? ` · ${ix.name}` : ''}</span>)}</div>
+      {e.error && (
+        <div className="error">
+          <b>{e.error.code !== undefined ? `Error ${e.error.code}` : 'Error'}</b> {e.error.name}
+          <details><summary>message</summary><pre>{e.error.message}</pre></details>
+        </div>
+      )}
+      {e.changes.length > 0 && (
+        <ul className="changes">
+          {e.changes.slice(0, 12).map((c) => (
+            <li key={c.path}><span className="mono">{c.path}</span> <s>{String(c.from ?? '∅')}</s> → <b>{String(c.to ?? '∅')}</b></li>
+          ))}
+          {e.changes.length > 12 && <li className="muted">…{e.changes.length - 12} more</li>}
+        </ul>
+      )}
+      {!e.error && e.changes.length === 0 && <div className="muted">no state change observed</div>}
+      <button className="ghost" onClick={() => setRaw(!raw)}>{raw ? 'hide' : 'accounts'}</button>
+      {raw && <pre>{JSON.stringify(json(e.instructions), null, 2)}</pre>}
+    </div>
   );
 }

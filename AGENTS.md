@@ -66,7 +66,8 @@ second approves, any member executes).
 | `curate_bounty` | council | writes the terms, once |
 | `open_bounty`, `pause_bounty`, `resume_bounty`, `close_funding`, `cancel_bounty` | council | state transitions (`cancel_bounty` also frees a claimed, undelivered work bounty) |
 | `contribute` | eligible member | USDC into the capital vault; mints ownership + profit and the holding share |
-| `claim_bounty`, `submit_delivery` | eligible member (the claimant) | work bounty |
+| `claim_bounty` | eligible member | takes on an open work bounty |
+| `submit_delivery` | the claimant (no eligibility check; settlement checks it) | records the delivery hash |
 | `accept_delivery`, `reject_delivery` | council | work bounty |
 | `settle_work` | anyone | mints the curated reward to the claimant |
 | `record_inflow` | payer of the rent | USDC into the income vault; raises every profit holder's claim (refused before the first issuance) |
@@ -83,6 +84,26 @@ Eligibility is enforced at thaw and freeze, not on every transfer. To remove som
 sends `revokeAndFreezeInstructions(asset, payer, issuer, wallet)`: revocation and both freezes in
 one transaction.
 
+## Screens and the calls behind them
+
+Every function below is exported from `clients/ts/src`. One row is one transaction unless it says
+otherwise. `app/src/App.tsx` wires every one of these to a button, so it is a working reference.
+
+| Screen / user action | Reads first | Sends | Errors to expect |
+|---|---|---|---|
+| **Connect wallet** | wallet state: `connected.supportedTransactionVersions.has(1)`; if not, build a `version: 0` client | nothing | — |
+| **Verify / join** (first visit) | `holderAccounts(asset, wallet)` → `fetchMaybeAttestation(attestation)` | `joinInstructions(rpc, asset, wallet, payer)` (only the missing steps) | 6016 NotEligible, 6015 AttestationExpired, 6040 MutableOwner |
+| **Fund a tranche** | open financial bounties; show `amount × price_num / price_den` tokens and `target − raised` | `contributeInstruction(asset, bounty, wallet, amount, receiptId)`; `receiptId` unique per wallet (e.g. `BigInt(Date.now())`) | 6028 ExceedsTarget, 6029 DeadlinePassed, 6030 ZeroTokens, 6020 HolderFrozen (run join), 6021 InvalidBountyState (paused or closed) |
+| **Name a gap** | — | `proposeInstruction(asset, wallet, BountyKind.Work \| Financial, title, sha256(spec))`; the spec document lives off-chain | 6005 InvalidTitle, 6016 NotEligible |
+| **Take on work** | open work bounties and their `terms.reward` | `claimBountyInstruction(asset, bounty, wallet)` | 6021 InvalidBountyState (someone was faster), 6022 WrongBountyKind |
+| **Deliver work** | the bounty, `claimant == wallet` | `getSubmitDeliveryInstructionAsync({ claimant, bounty, deliveryHash })` | 6032 NotClaimant, 6033 EmptyDelivery |
+| **Get paid for work** | bounty state `Accepted` | `settleWorkInstruction(asset, bounty, claimant)` (anyone may send it) | 6016 NotEligible (claimant lapsed), 6020 HolderFrozen |
+| **Council inbox** (members only) | Squads proposals for the multisig (`squadsClient.fetchProposal`) | build the inner instruction with `council: createNoopSigner(vault)`, then `councilAction(rpc, multisig, [ix], member)`: send `propose` (1 tx), then `approve(otherMember)` (1 tx each), then `execute(member)` (1 tx) | Squads 6008 InvalidProposalStatus (not enough approvals), 6005 NotAMember; Cachain errors surface on `execute` |
+| **My income** | position + asset: `accrued + balance × (rewardIndex − index) / 10^12` | `claimDistributionInstruction(asset, wallet)` | 6034 NothingToClaim, 6016 NotEligible (frozen holder: accrues, claims after reinstatement) |
+| **Send profit tokens** | the recipient's `holderAccounts` (must be joined) | `getTransferCheckedWithTransferHookInstructionAsync(client, { source, mint, destination, authority, amount, decimals })` | Token-2022 17 AccountFrozen (recipient not verified), 3012 (recipient has no position: they must join) |
+| **Operator: pay rent** | — | `recordInflowInstruction(asset, operator, amount)` | 6041 NoHolders |
+| **Issuer: whitelist** | — | `attestInstruction(...)` to add; `revokeAndFreezeInstructions(asset, payer, issuer, wallet)` to remove | SAS errors |
+
 ## Errors
 
 Program errors arrive as `Custom(code)`. `findCustomError(error)` in `clients/ts/src/errors.ts`
@@ -95,7 +116,7 @@ extracts the code from any Kit error; `describeError(code)` names it.
 | 6002 | AssetAlreadyLive | Setup already ran. |
 | 6003 | InvalidHoldingBps | Setup error: holding share must be below 100%. |
 | 6004 | MetadataTooLong | Setup error: token name, symbol or URI too long. |
-| 6005 | InvalidTitle | Give the bounty a title of 1 to 64 characters. |
+| 6005 | InvalidTitle | Give the bounty a title of 1 to 64 bytes (accented letters count as 2). |
 | 6006 | WrongMint | Wrong token for this asset (client bug). |
 | 6007 | WrongHoldingAccount | Wrong holding account (client bug). |
 | 6008 | WrongPosition | Wrong position account (client bug). |
@@ -134,6 +155,7 @@ extracts the code from any Kit error; `describeError(code)` names it.
 | 6041 | NoHolders | Income can be recorded only after the first tokens are issued. |
 | 17 | Token-2022 AccountFrozen | The recipient is not a verified member. |
 | 2000–2999 | Anchor constraint errors | A wrong account was passed (client bug). |
+| 3000–3999 | Anchor account errors | e.g. 3012 AccountNotInitialized: a position or token account is missing; run `joinInstructions` first. |
 | 6000+ from Squads | Squads errors | e.g. 6008 InvalidProposalStatus: the proposal needs more approvals; 6005 NotAMember. Check which program failed before naming the error. |
 
 ## Read-only data guide

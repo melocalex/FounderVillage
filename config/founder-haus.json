@@ -1,5 +1,5 @@
 {
-  "$comment": "Policy numbers for asset 01. The program holds none of these as literals: they are written into the Asset and Bounty accounts once, from this file. USDC amounts are whole units; scripts scale by 10^6.",
+  "$comment": "Policy numbers for asset 01. The program holds none of these as literals: they are written into the Asset and Bounty accounts once, from this file. USDC amounts are whole units; scripts scale by 10^6. The seed opens tranche 2; tranches 3 and 4 are reference for the council to curate later.",
   "assetId": 1,
   "holdingBps": 2000,
   "decimals": 6,

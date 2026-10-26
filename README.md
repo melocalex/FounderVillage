@@ -20,18 +20,20 @@
 
 > [!IMPORTANT]
 > **Status: a working protocol on localnet.** 49 tests pass, most of them against the real mainnet
-> binaries of the Solana Attestation Service and Squads, and an independent adversarial review's
-> findings are fixed. Nothing is deployed to devnet or mainnet, and the program has not had an
-> external audit. This is software, not an offer: no token here is for sale, and nothing in this
-> repository describes a return.
+> binaries of the Solana Attestation Service and Squads. An independent adversarial review's two
+> medium and one low findings are fixed, and its three trade-offs are recorded. Nothing is deployed
+> to devnet or mainnet, and the program has not had an
+> external audit. This is software, not an offer: no token here is for sale, and neither the code
+> nor its documentation projects a return. [PROMPT.md](PROMPT.md), the engineering brief, quotes
+> the offering's public terms only as context for the engineer.
 
 ## Three promises, enforced by the program
 
 | | What the program guarantees | How |
 |---|---|---|
 | **No token without delivery** | Asset tokens come into existence only from a funded financial bounty or a work bounty the council accepted. | Every mint path goes through `contribute` or `settle_work`; settling anything but an `Accepted` bounty reverts. |
-| **Holding is gated, not just buying** | A wallet can hold the asset only while it has a live, unexpired attestation from the whitelist issuer. | Mints are born frozen (`DefaultAccountState = Frozen`); only `thaw_holder` thaws, and only for attested wallets. Anyone can freeze a revoked one. |
-| **Nobody lists the holders** | Rent reaches every profit holder pro rata, with no snapshot, no Merkle root, and no authority stating who owns what. | An on-chain reward index plus a transfer hook that keeps every holder's balance exact. Holders pull their share. |
+| **Holding is gated, not just buying** | An account can receive or move the asset only after the gate thaws it for a wallet with a live attestation from the whitelist issuer. When the attestation lapses, anyone can freeze the account; the balance stays. | Mints are born frozen (`DefaultAccountState = Frozen`); only `thaw_holder` thaws, and only for attested wallets. The issuer revokes and freezes in one transaction. |
+| **Nobody lists the holders** | Rent reaches every profit holder pro rata, with no snapshot, no Merkle root, and no authority stating who owns what. | An on-chain reward index plus a transfer hook that moves each holder's tracked balance with every transfer (burns are not tracked; see D9). Holders pull their share. |
 
 ## Quickstart
 
@@ -43,10 +45,11 @@ npm run dev
 
 One command builds the program if needed, fetches the SAS and Squads binaries from mainnet
 (read-only), boots an **offline Surfpool**, deploys, seeds a Founder Haus scenario, prints every
-address, and opens the test harness at **http://localhost:5183**.
+address, and serves the test harness at **http://localhost:5183**.
 
-You need Node ≥ 20.18. To rebuild the program you also need Rust ≥ 1.89, Solana CLI 4.1.2 and
-Anchor 1.2.1 (`cargo install --git https://github.com/otter-sec/anchor --tag v1.2.1 anchor-cli --locked`).
+You need Node ≥ 22.12. A fresh clone builds the program on the first run, so you also need
+Rust ≥ 1.89, Solana CLI 4.1.2 and Anchor 1.2.1
+(`cargo install --git https://github.com/otter-sec/anchor --tag v1.2.1 anchor-cli --locked`).
 
 <p align="center">
   <img src="assets/harness.png" alt="The test harness: persona switcher, the holder's attestation, token accounts and position, the asset ledger, bounties and every instruction as a button" width="760">
@@ -57,11 +60,11 @@ The seeded scenario: **Ana** (verified, has funded the tranche), **Bruno** (veri
 on the whitelist), the **operator** who pays rent, the **holding**, and three **council** members
 behind a 2-of-3 Squads vault. Try it in this order:
 
-1. As **eve**, press *join*: the gate refuses with `NotEligible`.
-2. As **bruno**, select the rooftop work bounty, *claim* it and *submit delivery*.
-3. As **councilA**, press *accept*; switch to **councilB**, *approve*, then *execute*.
+1. As **eve**, press *join (thaw)*: the gate refuses with `NotEligible`.
+2. As **bruno**, select the rooftop work bounty, press *claim work bounty*, then *submit delivery*.
+3. As **councilA**, press *accept*; switch to **councilB**, press *approve as councilB*, then *execute*.
 4. Press *settle work*: Bruno's tokens mint, and the holding's share mints with them.
-5. As **operator**, *record inflow*; as **ana**, *claim distribution*. Claim again: `NothingToClaim`.
+5. As **operator**, press *record inflow (rent)*; as **ana**, *claim distribution*. Claim again: `NothingToClaim`.
 
 ## How it works
 
@@ -108,7 +111,8 @@ credential and schema, the subject, the expiry, and that the signer is still aut
 <img src="assets/state-machine.svg" alt="Proposed, Curated, Open; work: Claimed, Delivered, Accepted, Settled or Rejected; financial: Paused and close into Settled; Cancelled without capital" width="100%">
 
 The lifecycle lives in the program, not in a mutable config. Each transition is one instruction, an
-illegal one reverts with `InvalidBountyState`, and the terms cannot change after curation.
+call in the wrong state reverts with `InvalidBountyState` (in the wrong kind of bounty, with
+`WrongBountyKind`), and the terms cannot change after curation.
 
 ## Distributions
 
@@ -149,12 +153,17 @@ each is a deliberate change here:
 | | Localnet (`npm run dev`, CI) | Devnet |
 |---|---|---|
 | Cachain program | ✅ deployed and exercised end to end | ⏳ not deployed |
-| SAS, Squads, Token-2022 | ✅ mainnet binaries | ⏳ |
-| Explorer links per instruction | ✅ in the harness (custom RPC) | ⏳ |
+| SAS, Squads | ✅ mainnet binaries | ⏳ |
+| Token-2022, Associated Token | ✅ the builds bundled with LiteSVM and Surfpool | ⏳ |
+| Explorer link per transaction | ✅ in the harness (custom RPC) | ⏳ |
 
 Deploying to devnet needs a wallet you keep as upgrade authority. It is the next step, not a claim.
 
 ## Tests
+
+The suites load `target/deploy/cachain.so` and the fetched SAS and Squads binaries, so run
+`npm run dev` once, or `npm run build:program && npm run fixtures:programs`, before them. Or run the
+whole gate in Docker (below).
 
 ```bash
 npm test                 # 42 tests in LiteSVM, against the mainnet SAS and Squads binaries
@@ -173,8 +182,9 @@ claim twice and payouts never exceed recorded income, even across many tiny infl
 be recorded before anyone holds; a claimed work bounty that is never delivered can be freed; and a
 holder can be revoked and frozen in one transaction. Every rejection asserts its exact error code.
 
-Reviews so far: the Solana MCP static linter (clean), and an independent adversarial review whose
-two medium findings and one low finding are fixed with regression tests. See
+Reviews so far: an independent adversarial review whose two medium findings and one low finding are
+fixed with regression tests (the Solana MCP static linter also ran clean; it is not counted as a
+review). See
 [docs/DECISIONS.md](docs/DECISIONS.md#reviews).
 
 CI runs `cargo fmt`, `clippy -D warnings`, the property tests, `anchor build`, the Codama drift check,
@@ -192,7 +202,7 @@ config/             policy numbers for each asset
 idl/                Cachain IDL and the vendored Squads v4 IDL (MIT)
 docs/DECISIONS.md   every design choice, its source, and what is still open
 AGENTS.md           the handoff for whoever builds the production frontend
-PROMPT.md           the engineering brief this was built against
+PROMPT.md           the engineering brief this was built against (agent rules and project context)
 ```
 
 ## What going live costs

@@ -42,14 +42,14 @@
     <rect class="card" width="184" height="236" rx="16"/>
     <circle cx="28" cy="30" r="15" fill="#FFB86B"/><text x="28" y="35" class="n" text-anchor="middle">3</text>
     <text x="52" y="36" class="h">Deliver</text>
-    <text class="b"><tspan x="18" y="72">Work: claim it, deliver</tspan><tspan x="18" y="92">it, the council accepts.</tspan><tspan x="18" y="122">Capital: USDC goes</tspan><tspan x="18" y="142">into the SPE vault.</tspan></text>
+    <text class="b"><tspan x="18" y="72">Work: claim it, deliver</tspan><tspan x="18" y="92">it, the council accepts.</tspan><tspan x="18" y="122">Capital: USDC goes into</tspan><tspan x="18" y="142">the asset's capital vault.</tspan></text>
     <text class="m"><tspan x="18" y="176">claim_bounty</tspan><tspan x="18" y="194">submit_delivery</tspan><tspan x="18" y="212">contribute</tspan></text>
   </g>
   <g transform="translate(652 112)">
     <rect class="card" width="184" height="236" rx="16" stroke="url(#sol)" stroke-width="2"/>
     <circle cx="28" cy="30" r="15" fill="#14F195"/><text x="28" y="35" class="n" text-anchor="middle">4</text>
     <text x="52" y="36" class="h">Own it</text>
-    <text class="b"><tspan x="18" y="72">Ownership and profit</tspan><tspan x="18" y="92">tokens mint into an</tspan><tspan x="18" y="112">account born frozen.</tspan><tspan x="18" y="132">The gate thaws it for</tspan><tspan x="18" y="152">attested wallets only.</tspan></text>
+    <text class="b"><tspan x="18" y="72">Accounts are born</tspan><tspan x="18" y="92">frozen. The gate thaws</tspan><tspan x="18" y="112">them for attested</tspan><tspan x="18" y="132">wallets only; then the</tspan><tspan x="18" y="152">ownership and profit</tspan><tspan x="18" y="172">tokens mint into them.</tspan></text>
     <text class="m"><tspan x="18" y="194">thaw_holder</tspan><tspan x="18" y="212">settle_work</tspan></text>
   </g>
   <g transform="translate(856 112)">

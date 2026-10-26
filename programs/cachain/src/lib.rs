@@ -5,7 +5,7 @@
 //! attestation can be thawed and hold them. Tokens come into existence only through bounties:
 //! a financial bounty mints as USDC arrives, a work bounty mints when the council accepts the
 //! delivery. Every issuance carries the holding's share. Rent paid in through `record_inflow`
-//! is claimable pro rata by profit holders, tracked exactly through the profit mint's transfer
+//! is claimable pro rata by profit holders, tracked across transfers through the profit mint's transfer
 //! hook, so no authority ever states who the holders are.
 #![deny(unsafe_code)]
 

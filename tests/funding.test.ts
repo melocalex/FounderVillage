@@ -86,6 +86,7 @@ describe('financial bounties', () => {
     const { world } = ctx;
     const single = { council: world.keys.councilA, asset: world.asset.address, bounty };
     await expectCode(world.send([await getPauseBountyInstructionAsync(single)]), CACHAIN_ERROR__NOT_COUNCIL);
+    await expectCode(world.send([await getResumeBountyInstructionAsync(single)]), CACHAIN_ERROR__NOT_COUNCIL);
     await expectCode(world.send([await getCloseFundingInstructionAsync(single)]), CACHAIN_ERROR__NOT_COUNCIL);
   });
 

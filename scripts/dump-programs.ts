@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { address, createSolanaRpc, getBase64Encoder, type Address } from '@solana/kit';
 
-const RPC = process.env.MAINNET_RPC_URL ?? 'https://api.mainnet-beta.solana.com';
+const RPC = process.env.MAINNET_RPC_URL || 'https://api.mainnet-beta.solana.com';
 const OUT = 'tests/fixtures';
 const PROGRAMDATA_HEADER = 45; // UpgradeableLoaderState::ProgramData: tag u32, slot u64, Option<Pubkey>
 

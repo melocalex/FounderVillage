@@ -1,0 +1,13 @@
+.git
+target
+.anchor
+node_modules
+app/dist
+app/public/localnet.json
+tests/fixtures
+test-ledger
+.env
+.env.*
+!.env.example
+*-keypair.json
+.DS_Store

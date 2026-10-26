@@ -78,7 +78,7 @@ describe('eligibility gate', () => {
     await expectCode(world.send([transfer]), TOKEN_ERROR_ACCOUNT_FROZEN);
   });
 
-  it('refuses a contribution from a wallet using someone else attestation', async () => {
+  it("refuses to thaw a wallet presenting someone else's attestation", async () => {
     const { world } = ctx;
     const ana = await holderAccounts(world.asset, world.keys.ana.address);
     const eve = await holderAccounts(world.asset, world.keys.eve.address);
@@ -161,7 +161,7 @@ describe('eligibility gate', () => {
     await world.send([
       await revokeInstruction(world.client.payer, world.keys.issuer, world.issuer.credential, world.issuer.schema, world.keys.ana.address),
     ]);
-    // Eve, an outsider, pays to enforce it.
+    // freeze_holder needs no signer at all: any fee payer can enforce a revocation.
     await world.client.sendTransaction(await freezeInstructions(world.asset, world.keys.ana.address));
     const ana = await holderAccounts(world.asset, world.keys.ana.address);
     expect((await fetchToken(world.client.rpc, ana.ownership)).data.state).toBe(AccountState.Frozen);

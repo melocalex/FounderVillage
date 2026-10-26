@@ -7,8 +7,8 @@ First working version, on localnet.
 - Anchor 1.2.1 program: assets with Token-2022 ownership and profit mints (frozen by default,
   transfer hook, metadata), an eligibility gate on Solana Attestation Service attestations, the
   bounty state machine with financial and work bounties, the holding's share on every issuance,
-  USDC capital and income vaults with a ledger, and pull distributions kept exact by the profit
-  mint's transfer hook.
+  USDC capital and income vaults with a ledger, and pull distributions whose balances follow every
+  transfer through the profit mint's transfer hook.
 - The gate thaws only token accounts with `ImmutableOwner`, so a thawed account cannot be handed to
   a wallet that never passed it.
 - Council actions through a 2-of-3 Squads v4 vault.

@@ -50,13 +50,15 @@ const rows: [string, string][] = [
 console.log('\nLocal Founder Haus is up. Demo keys derive from the public seed', JSON.stringify(DEMO_SEED), '(localnet only).\n');
 for (const [k, v] of rows) console.log(`  ${k.padEnd(26)} ${v}`);
 
+// The harness reaches Surfpool through the dev server's /rpc and /ws proxies, so only the
+// harness port has to be reachable (from a container, say), not Surfpool's dynamic ports.
 mkdirSync('app/public', { recursive: true });
 writeFileSync(
   'app/public/localnet.json',
   JSON.stringify(
     {
-      rpcUrl: surfnet.rpcUrl,
-      wsUrl: surfnet.wsUrl,
+      rpcUrl: '/rpc',
+      wsUrl: '/ws',
       asset: asset.address,
       multisig: world.multisig,
       council: world.council,
@@ -75,7 +77,18 @@ if (process.argv.includes('--seed-only')) {
 
 step('serving the harness');
 const { createServer } = await import('vite');
-const server = await createServer({ configFile: 'app/vite.config.ts' });
+const strip = (prefix: string) => (path: string) => path.replace(new RegExp(`^${prefix}`), '') || '/';
+const server = await createServer({
+  configFile: 'app/vite.config.ts',
+  server: {
+    // CACHAIN_HOST=0.0.0.0 inside Docker; loopback otherwise.
+    host: process.env.CACHAIN_HOST || undefined,
+    proxy: {
+      '/rpc': { target: surfnet.rpcUrl, changeOrigin: true, rewrite: strip('/rpc') },
+      '/ws': { target: surfnet.wsUrl, ws: true, changeOrigin: true, rewrite: strip('/ws') },
+    },
+  },
+});
 await server.listen();
 server.printUrls();
 console.log('\nCtrl-C stops everything.');

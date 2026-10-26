@@ -30,3 +30,4 @@ dist/
 # Third-party program binaries fetched by scripts/dump-programs.ts
 /tests/fixtures/*.so
 /tests/fixtures/squads-program-config.json
+/app/public/localnet.json

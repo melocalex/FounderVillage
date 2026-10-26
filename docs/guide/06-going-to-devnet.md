@@ -48,9 +48,23 @@ NO_DNA=1 anchor deploy --provider.cluster devnet
 
 ## 5. Seed it
 
-Devnet already runs the Attestation Service and Squads. A devnet seed script that creates the
-credential, the council and the asset with a devnet USDC stand-in is the next piece of work; until
-it lands, `npm run dev` remains the full demo.
+Devnet already runs the Attestation Service and Squads. One command creates the whitelist
+credential, the 2-of-3 council, a USDC stand-in and the asset, then runs the demo scenario:
+
+```bash
+npm run devnet:seed
+```
+
+Your wallet pays. The demo roles derive from a private seed in `.devnet/seed` (git-ignored), so only
+you can act as the devnet council or issuer. The script writes every address to `docs/devnet.md`.
+
+To let a tester use their own wallet, send them devnet SOL instructions and run:
+
+```bash
+npm run devnet:onboard -- <their wallet address>
+```
+
+It puts the wallet on the whitelist and mints it 10,000 test USDC. A second run keeps the attestation.
 
 ## ✅ Proof
 

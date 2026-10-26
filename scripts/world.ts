@@ -76,12 +76,12 @@ export async function hash(label: string): Promise<Uint8Array> {
 export async function buildWorld(
   client: WorldClient,
   fund: (address: Address, lamports: bigint) => Promise<void> | void,
-  options: { attest?: DemoRole[]; usdcFor?: DemoRole[] } = {},
+  options: { attest?: DemoRole[]; usdcFor?: DemoRole[]; seed?: string; fundLamports?: bigint } = {},
 ) {
-  const keys = await demoSigners();
+  const keys = await demoSigners(options.seed);
   const send = (ixs: Instruction[]) => client.sendTransaction(ixs);
   const payers: DemoRole[] = ['creator', 'issuer', 'councilA', 'councilB', 'councilC', 'holding', 'operator', 'ana', 'bruno', 'eve'];
-  for (const role of payers) await fund(keys[role].address, 100_000_000_000n);
+  for (const role of payers) await fund(keys[role].address, options.fundLamports ?? 100_000_000_000n);
 
   // Contribution token: a local stand-in for USDC (6 decimals, classic SPL Token).
   const usdc = keys.usdcMint.address;

@@ -1,6 +1,6 @@
 <p align="center"><img src="assets/hero.svg" alt="Cachain: real-world assets, owned by the people who build them" width="100%"></p>
 <p align="center">
-  <b>In one command, a Founder Haus world runs on your machine; in six short guides, you know how its contracts gate, fund, build and pay out an asset.</b><br>
+  <b>Members earn a Founder Village asset's tokens by delivering work or capital. Only whitelisted wallets can hold them, and rent paid into the asset is shared among holders on-chain.</b><br>
   <a href="docs/guide/01-run-it.md"><b>Start</b></a> · <a href="docs/CONTRACTS.md">How the contracts work</a> · <a href="docs/guide/00-new-to-solana.md">New to Solana</a> ·
   <a href="AGENTS.md">Frontend handoff</a> · <a href="AGENTS.md#errors">Errors</a> · <a href="docs/DECISIONS.md">Decisions</a>
 </p>

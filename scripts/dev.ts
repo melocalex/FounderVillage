@@ -13,7 +13,9 @@ const step = (text: string) => console.log(`\n▸ ${text}`);
 const missing = missingArtifacts();
 if (missing.some((f) => f.endsWith('cachain.so'))) {
   step('building the program (anchor build)');
-  execFileSync('anchor', ['build'], { stdio: 'inherit', env: { ...process.env, NO_DNA: '1' } });
+  // --ignore-keys: a fresh clone has no program keypair (git-ignored); declare_id! fixes the ID,
+  // and the local deploy loads the binary at that address without a key.
+  execFileSync('anchor', ['build', '--ignore-keys'], { stdio: 'inherit', env: { ...process.env, NO_DNA: '1' } });
 }
 if (missing.some((f) => f.startsWith('tests/fixtures'))) {
   step('fetching SAS and Squads binaries from mainnet (read-only)');

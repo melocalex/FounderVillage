@@ -58,14 +58,15 @@ WORKDIR /cachain
 FROM toolchain AS program
 COPY Cargo.toml Cargo.lock Anchor.toml ./
 COPY programs ./programs
-RUN anchor build
+# --ignore-keys: the program keypair is never copied into the image; declare_id! fixes the ID.
+RUN anchor build --ignore-keys
 
 # Node dependencies, then the rest of the repository.
 FROM program AS workspace
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
 COPY . .
-RUN anchor build && npm run fixtures:programs
+RUN anchor build --ignore-keys && npm run fixtures:programs
 
 EXPOSE 5183
 CMD ["bash", "scripts/gate.sh"]

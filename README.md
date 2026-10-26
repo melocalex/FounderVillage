@@ -1,7 +1,9 @@
+<p align="center"><img src="assets/hero.svg" alt="Cachain: real-world assets, owned by the people who build them" width="100%"></p>
 <p align="center">
-  <img src="assets/hero.svg" alt="Cachain: real-world assets, owned by the people who build them" width="100%">
+  <b>In one command, a Founder Haus world runs on your machine; in six short guides, you know how its contracts gate, fund, build and pay out an asset.</b><br>
+  <a href="docs/guide/01-run-it.md"><b>Start</b></a> · <a href="docs/CONTRACTS.md">How the contracts work</a> · <a href="docs/guide/00-new-to-solana.md">New to Solana</a> ·
+  <a href="AGENTS.md">Frontend handoff</a> · <a href="AGENTS.md#errors">Errors</a> · <a href="docs/DECISIONS.md">Decisions</a>
 </p>
-
 <p align="center">
   <a href="https://github.com/melocalex/cachain/actions/workflows/ci.yml"><img src="https://github.com/melocalex/cachain/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <img src="https://img.shields.io/badge/Anchor-1.2.1-512BD4" alt="Anchor 1.2.1">
@@ -11,83 +13,101 @@
   <img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="Apache-2.0">
 </p>
 
+> **Cachain** is the on-chain protocol behind Founder Village, a curated community of founders in
+> Jurerê Internacional, Florianópolis, building its neighborhood one asset at a time and owning what
+> it builds. Each asset sits in its own SPE. Members deliver **work** or **capital** through
+> bounties and receive the asset's tokens only when the delivery is real. **Not technical?** Read
+> [How the contracts work](docs/CONTRACTS.md): one page, no code.
+
+## 🚀 Running in 3 steps
+
+| You need | For |
+|---|---|
+| **Node ≥ 22.12** | the client, the tests and the harness |
+| **Rust ≥ 1.89, Solana CLI 4.1.2, Anchor 1.2.1**, or **Docker** | building the program (a fresh clone builds it once) |
+
+```bash
+# 1. Clone
+git clone https://github.com/melocalex/cachain && cd cachain
+
+# 2. Install
+npm install --ignore-scripts
+
+# 3. Run: builds, boots an offline Surfpool, deploys, seeds Founder Haus, serves the harness
+npm run dev
+```
+
+No toolchain? `docker compose up dev` does the same in a pinned image.
+
+Saw `Local Founder Haus is up`? Open **http://localhost:5183** and, in the harness:
+
+1. As **Eve**, press **Join**: the gate refuses with `NotEligible`. She is not on the whitelist.
+2. As **Bruno**, on the rooftop bounty, press **Claim**, then **Submit delivery**.
+3. As **Council A**, press **Accept**; as **Council B**, **Approve**, then **Execute**.
+4. Press **Settle**: Bruno's tokens mint, and the holding's share mints with them.
+5. As **Operator**, **Record rent**; as **Ana**, **Claim rent**. Claim again: `NothingToClaim`.
+
 <p align="center">
-  <b>Cachain</b> is the on-chain protocol behind Founder Village: a curated community of founders in
-  Jurerê Internacional, Florianópolis, building its own neighborhood one asset at a time and owning
-  what it builds. Each asset sits in its own SPE. Members deliver work or capital through bounties,
-  and receive the asset's tokens only when the delivery is real.
+  <img src="assets/harness.png" alt="The test harness: personas with whitelist state, asset totals, a bounty board, the council inbox and an activity timeline" width="900">
 </p>
+
+Something failed? Start at [Run it · If it fails](docs/guide/01-run-it.md#if-it-fails).
 
 > [!IMPORTANT]
 > **Status: a working protocol on localnet.** 49 tests pass, most of them against the real mainnet
-> binaries of the Solana Attestation Service and Squads. An independent adversarial review's two
-> medium and one low findings are fixed, and its three trade-offs are recorded. Nothing is deployed
-> to devnet or mainnet, and the program has not had an
-> external audit. This is software, not an offer: no token here is for sale, and neither the code
-> nor its documentation projects a return. [PROMPT.md](PROMPT.md), the engineering brief, quotes
-> the offering's public terms only as context for the engineer.
+> binaries of the Solana Attestation Service and Squads, and an independent adversarial review's
+> findings are fixed or recorded as trade-offs. Not yet on devnet; no external audit. This is
+> software, not an offer: no token here is for sale, and neither the code nor its documentation
+> projects a return. [PROMPT.md](PROMPT.md), the engineering brief, quotes the offering's public
+> terms only as context for the engineer.
 
-## Three promises, enforced by the program
+<p align="center"><img src="assets/flow.svg" alt="Six steps: name a gap, curate, deliver, own it, operate, claim" width="100%"></p>
 
-| | What the program guarantees | How |
+## 🧭 The journey
+
+Never touched Solana? Guide 00 first. The rest: ~1 h 30 in total.
+
+| # | Guide | You leave with | Time |
+|:-:|---|---|:-:|
+| **00** | [New to Solana](docs/guide/00-new-to-solana.md) | accounts, PDAs, tokens, Anchor and the client, each shown in this repo | ~45 min |
+| **01** | [Run it locally](docs/guide/01-run-it.md) | the Founder Haus world and the harness on your machine | ~15 min |
+| **02** | [The whitelist](docs/guide/02-the-whitelist.md) | a member who can hold the asset, a wallet that cannot, a one-step revocation | ~10 min |
+| **03** | [Fund a tranche](docs/guide/03-fund-a-tranche.md) | USDC in, tokens minted in the same transaction, the holding's share alongside | ~10 min |
+| **04** | [Work and the council](docs/guide/04-work-and-the-council.md) | a work bounty from gap to settlement, accepted by two of three | ~15 min |
+| **05** | [Rent and claims](docs/guide/05-rent-and-claims.md) | rent split pro rata without any list of holders, claimed once | ~10 min |
+| **06** | [Going to devnet](docs/guide/06-going-to-devnet.md) | the program on devnet, visible in the explorer | ~30 min |
+
+## 🛡️ What the program guarantees
+
+| | Guarantee | How |
 |---|---|---|
 | **No token without delivery** | Asset tokens come into existence only from a funded financial bounty or a work bounty the council accepted. | Every mint path goes through `contribute` or `settle_work`; settling anything but an `Accepted` bounty reverts. |
 | **Holding is gated, not just buying** | An account can receive or move the asset only after the gate thaws it for a wallet with a live attestation from the whitelist issuer. When the attestation lapses, anyone can freeze the account; the balance stays. | Mints are born frozen (`DefaultAccountState = Frozen`); only `thaw_holder` thaws, and only for attested wallets. The issuer revokes and freezes in one transaction. |
 | **Nobody lists the holders** | Rent reaches every profit holder pro rata, with no snapshot, no Merkle root, and no authority stating who owns what. | An on-chain reward index plus a transfer hook that moves each holder's tracked balance with every transfer (burns are not tracked; see D9). Holders pull their share. |
+| **No single key decides** | Curation, acceptance, pausing and moving capital need two of three council members. | The council is a Squads v4 vault; one member's key is refused with `NotCouncil`. |
 
-## Quickstart
+## 🧩 Examples, one per flow
 
-```bash
-git clone https://github.com/melocalex/cachain && cd cachain
-npm install --ignore-scripts
-npm run dev
-```
+Every flow is a function in [`clients/ts/src/protocol.ts`](clients/ts/src/protocol.ts) built on the
+generated client, and every one is exercised by a test you can read top to bottom.
 
-One command builds the program if needed, fetches the SAS and Squads binaries from mainnet
-(read-only), boots an **offline Surfpool**, deploys, seeds a Founder Haus scenario, prints every
-address, and serves the test harness at **http://localhost:5183**.
+| Flow | Call | Test |
+|---|---|---|
+| Join the whitelist (open position, thaw both accounts) | `joinInstructions` | [`gate.test.ts`](tests/gate.test.ts) |
+| Revoke and freeze in one transaction | `revokeAndFreezeInstructions` | [`gate.test.ts`](tests/gate.test.ts) |
+| Fund a tranche | `contributeInstruction` | [`funding.test.ts`](tests/funding.test.ts) |
+| Propose, claim, deliver and settle work | `proposeInstruction`, `claimBountyInstruction`, `settleWorkInstruction` | [`work.test.ts`](tests/work.test.ts) |
+| A council action through Squads | `councilAction` → `propose`, `approve`, `execute` | [`council.test.ts`](tests/council.test.ts) |
+| Record rent, claim it, move it with a transfer | `recordInflowInstruction`, `claimDistributionInstruction` | [`distribution.test.ts`](tests/distribution.test.ts) |
+| The whole path on a real RPC | all of the above | [`e2e/full-flow.test.ts`](tests/e2e/full-flow.test.ts) |
 
-You need Node ≥ 22.12. A fresh clone builds the program on the first run, so you also need
-Rust ≥ 1.89, Solana CLI 4.1.2 and Anchor 1.2.1
-(`cargo install --git https://github.com/otter-sec/anchor --tag v1.2.1 anchor-cli --locked`).
+> [!TIP]
+> **Want the whole story in one file?** [`tests/e2e/full-flow.test.ts`](tests/e2e/full-flow.test.ts)
+> runs gap → bounty → funding → gate → work → rent → claim on Surfpool in about 70 lines.
 
-<p align="center">
-  <img src="assets/harness.png" alt="The test harness: persona switcher, the holder's attestation, token accounts and position, the asset ledger, bounties and every instruction as a button" width="760">
-  <br><sub>The harness is deliberately plain: every action shows its instruction, accounts, signature, state before and after, and the program error when it fails.</sub>
-</p>
+## 🏛️ Architecture
 
-The seeded scenario: **Ana** (verified, has funded the tranche), **Bruno** (verified), **Eve** (not
-on the whitelist), the **operator** who pays rent, the **holding**, and three **council** members
-behind a 2-of-3 Squads vault. Try it in this order:
-
-1. As **eve**, press *join (thaw)*: the gate refuses with `NotEligible`.
-2. As **bruno**, select the rooftop work bounty, press *claim work bounty*, then *submit delivery*.
-3. As **councilA**, press *accept*; switch to **councilB**, press *approve as councilB*, then *execute*.
-4. Press *settle work*: Bruno's tokens mint, and the holding's share mints with them.
-5. As **operator**, press *record inflow (rent)*; as **ana**, *claim distribution*. Claim again: `NothingToClaim`.
-
-## How it works
-
-<img src="assets/flow.svg" alt="Six steps: name a gap, curate, deliver, own it, operate, claim" width="100%">
-
-Founder Village's mechanism is "identify, curate, bounties, value": a member names what the
-neighborhood is missing, the core contributors curate it, and it is broken into bounties that pay in
-that asset's own token. Cachain makes each step an instruction with its own signer:
-
-- A **work bounty** (design, legal, build, operate) is claimed by a member, delivered as a hash of
-  the work, and accepted or rejected by the council. Settlement mints exactly the reward written at
-  curation.
-- A **financial bounty** is a tranche: capital is the deliverable. Each USDC contribution moves into
-  the capital vault and mints the claim **in the same transaction**, at the price fixed at curation,
-  until the target or the deadline.
-- Every issuance mints **ownership** and **profit** tokens 1:1 to the member, and the **holding's
-  share** (20%, from the config file) alongside.
-
-## Architecture
-
-<img src="assets/architecture.svg" alt="Members, operator, council and issuer act on the Cachain program, which controls Token-2022 mints and USDC vaults and reads SAS attestations" width="100%">
-
-### Account model
+<p align="center"><img src="assets/architecture.svg" alt="Members, operator, council and issuer act on the Cachain program, which controls Token-2022 mints and USDC vaults and reads SAS attestations" width="100%"></p>
 
 | Account | Seeds | Holds |
 |---|---|---|
@@ -106,24 +126,24 @@ The whitelist lives in the **Solana Attestation Service**: one attestation per w
 a tier, never the record itself. The program re-derives that address, checks the owner, the pinned
 credential and schema, the subject, the expiry, and that the signer is still authorized.
 
-## The bounty state machine
+### The bounty state machine
 
-<img src="assets/state-machine.svg" alt="Proposed, Curated, Open; work: Claimed, Delivered, Accepted, Settled or Rejected; financial: Paused and close into Settled; Cancelled without capital" width="100%">
+<p align="center"><img src="assets/state-machine.svg" alt="Proposed, Curated, Open; work: Claimed, Delivered, Accepted, Settled or Rejected; financial: Paused and close into Settled; Cancelled without capital" width="100%"></p>
 
-The lifecycle lives in the program, not in a mutable config. Each transition is one instruction, an
+The lifecycle lives in the program, not in a mutable config. Each transition is one instruction. A
 call in the wrong state reverts with `InvalidBountyState` (in the wrong kind of bounty, with
 `WrongBountyKind`), and the terms cannot change after curation.
 
-## Distributions
+### Distributions
 
-<img src="assets/distribution.svg" alt="Reward index rises with each inflow; the transfer hook settles both sides of a transfer; holders claim accrued plus balance times the index rise" width="100%">
+<p align="center"><img src="assets/distribution.svg" alt="Reward index rises with each inflow; the transfer hook settles both sides of a transfer; holders claim accrued plus balance times the index rise" width="100%"></p>
 
 A plain transfer into a vault changes no accounting: only `record_inflow` counts as rent, and it is
 refused until someone holds profit tokens. Claims round down, pay once, and can never exceed what
 was recorded; the part of an inflow the index cannot represent is carried, in index units, into the
-next one. A test checks that once every holder has claimed, the income vault holds only rounding dust.
+next one.
 
-## Who holds which key
+### Who holds which key
 
 | Authority | Localnet demo | Intended for production |
 |---|---|---|
@@ -133,7 +153,7 @@ next one. A test checks that once every holder has claimed, the income vault hol
 | Program upgrade authority | none (loaded by Surfpool) | a Squads multisig; immutability is a deliberate later decision |
 | SPE treasury (capital destination) | a demo USDC account, pinned at creation | the SPE's account |
 
-## Parity with the EVM prior art
+### Parity with the EVM prior art
 
 An earlier version of the mechanism runs on EVM chains through Juicebox V6 and Revnet (the
 [Homerun](https://github.com/mejango/homerun) repository). Reading that code taught four lessons;
@@ -148,22 +168,16 @@ each is a deliberate change here:
 | Two tokens: a fund claim and an income claim | Two tokens: ownership and profit |
 | "Notice delay" appears in no code | Squads `time_lock` enforces one (to be set before devnet; see [DECISIONS](docs/DECISIONS.md) O8) |
 
-## Live on devnet vs simulated locally
+## 🧪 Tests and the gate
 
-| | Localnet (`npm run dev`, CI) | Devnet |
-|---|---|---|
-| Cachain program | ✅ deployed and exercised end to end | ⏳ not deployed |
-| SAS, Squads | ✅ mainnet binaries | ⏳ |
-| Token-2022, Associated Token | ✅ the builds bundled with LiteSVM and Surfpool | ⏳ |
-| Explorer link per transaction | ✅ in the harness (custom RPC) | ⏳ |
-
-Deploying to devnet needs a wallet you keep as upgrade authority. It is the next step, not a claim.
-
-## Tests
+```bash
+npm run gate             # everything CI runs, in order
+docker compose run --rm gate   # the same, in the pinned image
+```
 
 The suites load `target/deploy/cachain.so` and the fetched SAS and Squads binaries, so run
-`npm run dev` once, or `npm run build:program && npm run fixtures:programs`, before them. Or run the
-whole gate in Docker (below).
+`npm run dev` once (or `npm run build:program && npm run fixtures:programs`) before calling them
+one by one:
 
 ```bash
 npm test                 # 42 tests in LiteSVM, against the mainnet SAS and Squads binaries
@@ -182,30 +196,38 @@ claim twice and payouts never exceed recorded income, even across many tiny infl
 be recorded before anyone holds; a claimed work bounty that is never delivered can be freed; and a
 holder can be revoked and frozen in one transaction. Every rejection asserts its exact error code.
 
-Reviews so far: an independent adversarial review whose two medium findings and one low finding are
-fixed with regression tests (the Solana MCP static linter also ran clean; it is not counted as a
-review). See
-[docs/DECISIONS.md](docs/DECISIONS.md#reviews).
+Reviewed by an independent adversarial review; its two medium and one low findings are fixed with
+regression tests and its trade-offs recorded ([details](docs/DECISIONS.md#reviews)). CI also runs
+`cargo fmt`, `clippy -D warnings`, `anchor build`, the Codama drift check, `tsc` and `npm audit`,
+with actions pinned by commit SHA.
 
-CI runs `cargo fmt`, `clippy -D warnings`, the property tests, `anchor build`, the Codama drift check,
-`tsc`, `npm audit`, both test suites and the one-command bootstrap. Actions are pinned by commit SHA.
+## 🤖 With an AI agent
 
-## Repository
+1. **Hand it the rules.** [`AGENTS.md`](AGENTS.md) is one file: what the system is, the one command,
+   every instruction with its signer, the error table with UI copy, and which accounts each screen reads.
+2. **One guide per session.** Point it at a guide in [`docs/guide/`](docs/guide/) and ask for that outcome only.
+3. **Ask for proof.** A passing `npm run gate` and what the harness shows count; "it compiles" does not.
 
+## 📦 What's here
+
+```text
+cachain/
+├── programs/cachain/      the Anchor program: instructions/, sas.rs, token.rs, math.rs, state.rs
+├── clients/ts/src/        the Kit client: generated/ (Codama), protocol.ts, squads.ts, attestations.ts
+├── app/                   the test harness
+├── scripts/               dev, gate, localnet, seed, world, codama, dump-programs
+├── tests/                 LiteSVM suites, and tests/e2e on Surfpool
+├── docs/CONTRACTS.md      how the contracts work, for everyone
+├── docs/guide/            the seven guides, 00 to 06
+├── docs/DECISIONS.md      every design choice, its source, and what is still open
+├── config/                the policy numbers of each asset
+├── idl/                   the Cachain IDL and the vendored Squads v4 IDL (MIT)
+├── Dockerfile · docker-compose.yml   the pinned environment
+├── AGENTS.md              the handoff for whoever builds the production frontend
+└── PROMPT.md              the engineering brief this was built against
 ```
-programs/cachain/   Anchor program (instructions/, sas.rs, token.rs, math.rs, state.rs)
-clients/ts/src/     Kit client: generated/ (Codama), protocol.ts, squads.ts, attestations.ts
-app/                the test harness
-scripts/            dev, localnet, seed, world, codama, dump-programs
-tests/              LiteSVM suites and tests/e2e on Surfpool
-config/             policy numbers for each asset
-idl/                Cachain IDL and the vendored Squads v4 IDL (MIT)
-docs/DECISIONS.md   every design choice, its source, and what is still open
-AGENTS.md           the handoff for whoever builds the production frontend
-PROMPT.md           the engineering brief this was built against (agent rules and project context)
-```
 
-## What going live costs
+## 💰 What going live costs
 
 Read live from mainnet on 2026-10-26, at 5,080 lamports per byte. Rent is a refundable bond, not a
 fee; it comes back when the account closes.
@@ -237,3 +259,6 @@ Founder Village's offering documents are the only description of any offering.
 ## License
 
 [Apache-2.0](LICENSE)
+
+---
+[00 · New to Solana →](docs/guide/00-new-to-solana.md)

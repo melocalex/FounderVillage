@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "tsx scripts/dev.ts",
-    "build:program": "NO_DNA=1 anchor build",
+    "build:program": "NO_DNA=1 anchor build --ignore-keys",
     "codama": "tsx scripts/codama.ts",
     "codama:check": "tsx scripts/codama.ts && git diff --exit-code -- idl clients/ts/src/generated",
     "fixtures:programs": "tsx scripts/dump-programs.ts",

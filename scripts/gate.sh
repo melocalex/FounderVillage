@@ -11,7 +11,8 @@ cargo clippy --all-targets --locked -- -D warnings
 step "arithmetic unit and property tests"
 cargo test --locked -p cachain
 step "anchor build"
-anchor build
+# --ignore-keys: a fresh checkout has no program keypair (git-ignored); declare_id! fixes the ID.
+anchor build --ignore-keys
 if git rev-parse --git-dir >/dev/null 2>&1; then
   step "generated client matches the IDL"
   npm run -s codama:check

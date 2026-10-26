@@ -63,9 +63,10 @@ describe('Founder Haus end to end on Surfpool', () => {
 
     // Rent comes in and reaches holders pro rata: profit supply is 12,500 + 3,125 = 15,625.
     await world.send([await recordInflowInstruction(world.asset, keys.operator, 1_562_500_000n)]);
-    const before = await world.client.rpc.getTokenAccountBalance(await world.usdcAta(keys.ana.address)).send();
+    const anaFunds = await world.usdcAta(keys.ana.address);
+    const before = await net.client.rpc.getTokenAccountBalance(anaFunds).send();
     await world.send([await claimDistributionInstruction(world.asset, keys.ana)]);
-    const after = await world.client.rpc.getTokenAccountBalance(await world.usdcAta(keys.ana.address)).send();
+    const after = await net.client.rpc.getTokenAccountBalance(anaFunds).send();
     expect(BigInt(after.value.amount) - BigInt(before.value.amount)).toBe(1_000n * USDC);
   });
 });

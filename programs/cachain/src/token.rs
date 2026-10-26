@@ -375,18 +375,19 @@ impl Asset {
             self.distribution.carry = total;
             return Ok(());
         }
-        let step = crate::math::index_increment(total, self.distribution.tracked_supply)?;
+        let supply = self.distribution.tracked_supply;
+        let step = crate::math::index_increment(total, supply)?;
+        // What the index step actually promises holders; the rounding remainder waits for the
+        // next inflow instead of being stranded in the vault.
+        let promised = crate::math::accrued(supply, 0, step)?;
         self.distribution.reward_index = self
             .distribution
             .reward_index
             .checked_add(step)
             .ok_or(CachainError::MathOverflow)?;
-        self.distribution.carry = 0;
+        self.distribution.carry = total
+            .checked_sub(promised)
+            .ok_or(CachainError::MathOverflow)?;
         Ok(())
     }
-}
-
-/// Seeds of the position PDA for `owner`.
-pub fn position_seeds<'a>(asset: &'a Pubkey, owner: &'a Pubkey) -> [&'a [u8]; 3] {
-    [POSITION_SEED, asset.as_ref(), owner.as_ref()]
 }

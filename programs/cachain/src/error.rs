@@ -16,8 +16,6 @@ pub enum CachainError {
     InvalidTitle,
     #[msg("Mint does not belong to this asset")]
     WrongMint,
-    #[msg("Token account does not belong to this holder")]
-    WrongTokenAccount,
     #[msg("Token account does not belong to the asset holding")]
     WrongHoldingAccount,
     #[msg("Position does not belong to this holder")]
@@ -84,4 +82,6 @@ pub enum CachainError {
     MathOverflow,
     #[msg("Transfer hook was called outside of a transfer")]
     NotTransferring,
+    #[msg("Token account owner can be reassigned; use an associated token account")]
+    MutableOwner,
 }

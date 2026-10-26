@@ -1,0 +1,75 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  SOLANA_VERSION: 4.1.2
+  ANCHOR_VERSION: 1.2.1
+  NO_DNA: '1'
+
+jobs:
+  program:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: |
+            ~/.cargo/bin/anchor
+            ~/.local/share/solana
+            ~/.cache/solana
+          key: toolchain-solana-${{ env.SOLANA_VERSION }}-anchor-${{ env.ANCHOR_VERSION }}
+      - name: Toolchain
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt,clippy
+          if [ ! -x ~/.local/share/solana/install/active_release/bin/solana ]; then
+            sh -c "$(curl -sSfL https://release.anza.xyz/v${SOLANA_VERSION}/install)"
+          fi
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+          if ! command -v anchor >/dev/null || ! anchor --version | grep -q "$ANCHOR_VERSION"; then
+            cargo install --git https://github.com/otter-sec/anchor --tag "v${ANCHOR_VERSION}" anchor-cli --locked --force
+          fi
+      - run: cargo fmt --check
+      - run: cargo clippy --all-targets --locked -- -D warnings
+      - name: Property tests (host)
+        run: cargo test --locked -p cachain
+      - run: anchor build
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: program
+          path: |
+            target/deploy/cachain.so
+            target/idl/cachain.json
+
+  client:
+    needs: program
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: program
+          path: target
+      - run: npm ci --ignore-scripts
+      - name: Generated client matches the IDL
+        run: npm run codama:check
+      - run: npm run typecheck
+      - run: npm audit --audit-level=high
+      - name: Mainnet SAS and Squads binaries (read-only)
+        run: npm run fixtures:programs
+      - name: Unit tests (LiteSVM)
+        run: npm test
+      - name: End to end (embedded Surfpool)
+        run: npm run test:e2e
+      - name: One-command bootstrap seeds cleanly
+        run: npx tsx scripts/dev.ts --seed-only

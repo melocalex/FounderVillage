@@ -10,7 +10,13 @@ use crate::{
 };
 use anchor_lang::prelude::*;
 use anchor_spl::{
-    token_2022::Token2022,
+    token_2022::{
+        spl_token_2022::{
+            extension::{BaseStateWithExtensions, ExtensionType, StateWithExtensions},
+            state::Account as TokenAccountState,
+        },
+        Token2022,
+    },
     token_interface::{
         freeze_account, thaw_account, FreezeAccount, Mint, ThawAccount, TokenAccount,
     },
@@ -88,6 +94,21 @@ impl<'info> Gate<'info> {
     }
 }
 
+/// The gate checks the owner once, at thaw. An account whose owner can be reassigned afterwards
+/// would carry its thawed state to a wallet that never passed the gate, so only accounts with
+/// the ImmutableOwner extension (every Token-2022 associated token account has it) are thawed.
+fn require_immutable_owner(token_account: &AccountInfo) -> Result<()> {
+    let data = token_account.try_borrow_data()?;
+    let state = StateWithExtensions::<TokenAccountState>::unpack(&data)?;
+    require!(
+        state
+            .get_extension_types()?
+            .contains(&ExtensionType::ImmutableOwner),
+        CachainError::MutableOwner
+    );
+    Ok(())
+}
+
 /// Thaws a holder's token account. Permissionless: anyone may pay to thaw an eligible holder.
 pub fn thaw_holder(ctx: Context<Gate>) -> Result<()> {
     let a = &ctx.accounts;
@@ -99,6 +120,7 @@ pub fn thaw_holder(ctx: Context<Gate>) -> Result<()> {
         &a.owner.key(),
     )?;
     require!(a.token_account.is_frozen(), CachainError::AlreadyThawed);
+    require_immutable_owner(&a.token_account.to_account_info())?;
     let (id, bump) = a.asset_seeds_parts();
     let seeds: &[&[u8]] = &[ASSET_SEED, a.asset.creator.as_ref(), &id, &bump];
     thaw_account(CpiContext::new_with_signer(

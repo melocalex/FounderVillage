@@ -29,74 +29,74 @@ export const CACHAIN_ERROR__METADATA_TOO_LONG = 0x1774; // 6004
 export const CACHAIN_ERROR__INVALID_TITLE = 0x1775; // 6005
 /** WrongMint: Mint does not belong to this asset */
 export const CACHAIN_ERROR__WRONG_MINT = 0x1776; // 6006
-/** WrongTokenAccount: Token account does not belong to this holder */
-export const CACHAIN_ERROR__WRONG_TOKEN_ACCOUNT = 0x1777; // 6007
 /** WrongHoldingAccount: Token account does not belong to the asset holding */
-export const CACHAIN_ERROR__WRONG_HOLDING_ACCOUNT = 0x1778; // 6008
+export const CACHAIN_ERROR__WRONG_HOLDING_ACCOUNT = 0x1777; // 6007
 /** WrongPosition: Position does not belong to this holder */
-export const CACHAIN_ERROR__WRONG_POSITION = 0x1779; // 6009
+export const CACHAIN_ERROR__WRONG_POSITION = 0x1778; // 6008
 /** WrongAttestationAddress: Attestation account is not the one derived for this holder */
-export const CACHAIN_ERROR__WRONG_ATTESTATION_ADDRESS = 0x177a; // 6010
+export const CACHAIN_ERROR__WRONG_ATTESTATION_ADDRESS = 0x1779; // 6009
 /** AttestationWrongOwner: Attestation is not owned by the Solana Attestation Service */
-export const CACHAIN_ERROR__ATTESTATION_WRONG_OWNER = 0x177b; // 6011
+export const CACHAIN_ERROR__ATTESTATION_WRONG_OWNER = 0x177a; // 6010
 /** AttestationMalformed: Attestation data is malformed */
-export const CACHAIN_ERROR__ATTESTATION_MALFORMED = 0x177c; // 6012
+export const CACHAIN_ERROR__ATTESTATION_MALFORMED = 0x177b; // 6011
 /** AttestationWrongCredential: Attestation was issued under another credential */
-export const CACHAIN_ERROR__ATTESTATION_WRONG_CREDENTIAL = 0x177d; // 6013
+export const CACHAIN_ERROR__ATTESTATION_WRONG_CREDENTIAL = 0x177c; // 6012
 /** AttestationWrongSchema: Attestation was issued under another schema */
-export const CACHAIN_ERROR__ATTESTATION_WRONG_SCHEMA = 0x177e; // 6014
+export const CACHAIN_ERROR__ATTESTATION_WRONG_SCHEMA = 0x177d; // 6013
 /** AttestationWrongSubject: Attestation names another wallet */
-export const CACHAIN_ERROR__ATTESTATION_WRONG_SUBJECT = 0x177f; // 6015
+export const CACHAIN_ERROR__ATTESTATION_WRONG_SUBJECT = 0x177e; // 6014
 /** AttestationExpired: Attestation has expired */
-export const CACHAIN_ERROR__ATTESTATION_EXPIRED = 0x1780; // 6016
+export const CACHAIN_ERROR__ATTESTATION_EXPIRED = 0x177f; // 6015
 /** NotEligible: Holder has no valid attestation */
-export const CACHAIN_ERROR__NOT_ELIGIBLE = 0x1781; // 6017
+export const CACHAIN_ERROR__NOT_ELIGIBLE = 0x1780; // 6016
 /** StillEligible: Holder still holds a valid attestation */
-export const CACHAIN_ERROR__STILL_ELIGIBLE = 0x1782; // 6018
+export const CACHAIN_ERROR__STILL_ELIGIBLE = 0x1781; // 6017
 /** AlreadyThawed: Token account is already thawed */
-export const CACHAIN_ERROR__ALREADY_THAWED = 0x1783; // 6019
+export const CACHAIN_ERROR__ALREADY_THAWED = 0x1782; // 6018
 /** AlreadyFrozen: Token account is already frozen */
-export const CACHAIN_ERROR__ALREADY_FROZEN = 0x1784; // 6020
+export const CACHAIN_ERROR__ALREADY_FROZEN = 0x1783; // 6019
 /** HolderFrozen: Token account is frozen; thaw it through the eligibility gate first */
-export const CACHAIN_ERROR__HOLDER_FROZEN = 0x1785; // 6021
+export const CACHAIN_ERROR__HOLDER_FROZEN = 0x1784; // 6020
 /** InvalidBountyState: Bounty is not in the state this action requires */
-export const CACHAIN_ERROR__INVALID_BOUNTY_STATE = 0x1786; // 6022
+export const CACHAIN_ERROR__INVALID_BOUNTY_STATE = 0x1785; // 6021
 /** WrongBountyKind: Action does not apply to this kind of bounty */
-export const CACHAIN_ERROR__WRONG_BOUNTY_KIND = 0x1787; // 6023
+export const CACHAIN_ERROR__WRONG_BOUNTY_KIND = 0x1786; // 6022
 /** InvalidReward: Work bounty reward must be positive */
-export const CACHAIN_ERROR__INVALID_REWARD = 0x1788; // 6024
+export const CACHAIN_ERROR__INVALID_REWARD = 0x1787; // 6023
 /** InvalidPrice: Financial bounty price must have a positive numerator and denominator */
-export const CACHAIN_ERROR__INVALID_PRICE = 0x1789; // 6025
+export const CACHAIN_ERROR__INVALID_PRICE = 0x1788; // 6024
 /** InvalidTarget: Financial bounty target must be positive */
-export const CACHAIN_ERROR__INVALID_TARGET = 0x178a; // 6026
+export const CACHAIN_ERROR__INVALID_TARGET = 0x1789; // 6025
 /** InvalidDeadline: Deadline is already in the past */
-export const CACHAIN_ERROR__INVALID_DEADLINE = 0x178b; // 6027
+export const CACHAIN_ERROR__INVALID_DEADLINE = 0x178a; // 6026
 /** ZeroAmount: Contribution must be positive */
-export const CACHAIN_ERROR__ZERO_AMOUNT = 0x178c; // 6028
+export const CACHAIN_ERROR__ZERO_AMOUNT = 0x178b; // 6027
 /** ExceedsTarget: Contribution exceeds what remains of the bounty target */
-export const CACHAIN_ERROR__EXCEEDS_TARGET = 0x178d; // 6029
+export const CACHAIN_ERROR__EXCEEDS_TARGET = 0x178c; // 6028
 /** DeadlinePassed: Contribution deadline has passed */
-export const CACHAIN_ERROR__DEADLINE_PASSED = 0x178e; // 6030
+export const CACHAIN_ERROR__DEADLINE_PASSED = 0x178d; // 6029
 /** ZeroTokens: Contribution buys zero tokens at this price */
-export const CACHAIN_ERROR__ZERO_TOKENS = 0x178f; // 6031
+export const CACHAIN_ERROR__ZERO_TOKENS = 0x178e; // 6030
 /** FundsRaised: A financial bounty that has raised capital cannot be cancelled; close funding instead */
-export const CACHAIN_ERROR__FUNDS_RAISED = 0x1790; // 6032
+export const CACHAIN_ERROR__FUNDS_RAISED = 0x178f; // 6031
 /** NotClaimant: Only the member who claimed the bounty may deliver it */
-export const CACHAIN_ERROR__NOT_CLAIMANT = 0x1791; // 6033
+export const CACHAIN_ERROR__NOT_CLAIMANT = 0x1790; // 6032
 /** EmptyDelivery: Delivery hash must not be empty */
-export const CACHAIN_ERROR__EMPTY_DELIVERY = 0x1792; // 6034
+export const CACHAIN_ERROR__EMPTY_DELIVERY = 0x1791; // 6033
 /** NothingToClaim: Nothing to claim */
-export const CACHAIN_ERROR__NOTHING_TO_CLAIM = 0x1793; // 6035
+export const CACHAIN_ERROR__NOTHING_TO_CLAIM = 0x1792; // 6034
 /** ExceedsCapital: Amount exceeds the recorded capital in the vault */
-export const CACHAIN_ERROR__EXCEEDS_CAPITAL = 0x1794; // 6036
+export const CACHAIN_ERROR__EXCEEDS_CAPITAL = 0x1793; // 6035
 /** WrongTreasury: Outflow destination is not the SPE treasury */
-export const CACHAIN_ERROR__WRONG_TREASURY = 0x1795; // 6037
+export const CACHAIN_ERROR__WRONG_TREASURY = 0x1794; // 6036
 /** WrongVault: Vault is not this asset's vault */
-export const CACHAIN_ERROR__WRONG_VAULT = 0x1796; // 6038
+export const CACHAIN_ERROR__WRONG_VAULT = 0x1795; // 6037
 /** MathOverflow: Arithmetic overflow */
-export const CACHAIN_ERROR__MATH_OVERFLOW = 0x1797; // 6039
+export const CACHAIN_ERROR__MATH_OVERFLOW = 0x1796; // 6038
 /** NotTransferring: Transfer hook was called outside of a transfer */
-export const CACHAIN_ERROR__NOT_TRANSFERRING = 0x1798; // 6040
+export const CACHAIN_ERROR__NOT_TRANSFERRING = 0x1797; // 6039
+/** MutableOwner: Token account owner can be reassigned; use an associated token account */
+export const CACHAIN_ERROR__MUTABLE_OWNER = 0x1798; // 6040
 
 export type CachainError =
   | typeof CACHAIN_ERROR__ALREADY_FROZEN
@@ -124,6 +124,7 @@ export type CachainError =
   | typeof CACHAIN_ERROR__INVALID_TITLE
   | typeof CACHAIN_ERROR__MATH_OVERFLOW
   | typeof CACHAIN_ERROR__METADATA_TOO_LONG
+  | typeof CACHAIN_ERROR__MUTABLE_OWNER
   | typeof CACHAIN_ERROR__NOT_CLAIMANT
   | typeof CACHAIN_ERROR__NOT_COUNCIL
   | typeof CACHAIN_ERROR__NOT_ELIGIBLE
@@ -135,7 +136,6 @@ export type CachainError =
   | typeof CACHAIN_ERROR__WRONG_HOLDING_ACCOUNT
   | typeof CACHAIN_ERROR__WRONG_MINT
   | typeof CACHAIN_ERROR__WRONG_POSITION
-  | typeof CACHAIN_ERROR__WRONG_TOKEN_ACCOUNT
   | typeof CACHAIN_ERROR__WRONG_TREASURY
   | typeof CACHAIN_ERROR__WRONG_VAULT
   | typeof CACHAIN_ERROR__ZERO_AMOUNT
@@ -169,6 +169,7 @@ if (process.env['NODE_ENV'] !== 'production') {
     [CACHAIN_ERROR__INVALID_TITLE]: `Title is empty or longer than 64 bytes`,
     [CACHAIN_ERROR__MATH_OVERFLOW]: `Arithmetic overflow`,
     [CACHAIN_ERROR__METADATA_TOO_LONG]: `Name, symbol or URI is too long`,
+    [CACHAIN_ERROR__MUTABLE_OWNER]: `Token account owner can be reassigned; use an associated token account`,
     [CACHAIN_ERROR__NOT_CLAIMANT]: `Only the member who claimed the bounty may deliver it`,
     [CACHAIN_ERROR__NOT_COUNCIL]: `Only the asset council may perform this action`,
     [CACHAIN_ERROR__NOT_ELIGIBLE]: `Holder has no valid attestation`,
@@ -180,7 +181,6 @@ if (process.env['NODE_ENV'] !== 'production') {
     [CACHAIN_ERROR__WRONG_HOLDING_ACCOUNT]: `Token account does not belong to the asset holding`,
     [CACHAIN_ERROR__WRONG_MINT]: `Mint does not belong to this asset`,
     [CACHAIN_ERROR__WRONG_POSITION]: `Position does not belong to this holder`,
-    [CACHAIN_ERROR__WRONG_TOKEN_ACCOUNT]: `Token account does not belong to this holder`,
     [CACHAIN_ERROR__WRONG_TREASURY]: `Outflow destination is not the SPE treasury`,
     [CACHAIN_ERROR__WRONG_VAULT]: `Vault is not this asset's vault`,
     [CACHAIN_ERROR__ZERO_AMOUNT]: `Contribution must be positive`,

@@ -12,7 +12,7 @@
     "dev": "tsx scripts/dev.ts",
     "build:program": "NO_DNA=1 anchor build",
     "codama": "tsx scripts/codama.ts",
-    "codama:check": "tsx scripts/codama.ts && git diff --exit-code -- clients/ts/src/generated",
+    "codama:check": "tsx scripts/codama.ts && git diff --exit-code -- idl clients/ts/src/generated",
     "fixtures:programs": "tsx scripts/dump-programs.ts",
     "test": "vitest run",
     "test:e2e": "vitest run --config vitest.e2e.config.ts",

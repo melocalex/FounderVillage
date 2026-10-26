@@ -1,9 +1,20 @@
 // Holding is gated, not just buying: an account can hold the asset only while its owner holds a
 // live attestation, and anyone can enforce a revocation.
 import { beforeAll, describe, expect, it } from 'vitest';
-import { getTransferCheckedWithTransferHookInstructionAsync, AccountState, fetchToken, TOKEN_2022_PROGRAM_ADDRESS, getCreateAssociatedTokenIdempotentInstructionAsync } from '@solana-program/token-2022';
+import { generateKeyPairSigner } from '@solana/kit';
+import { getCreateAccountInstruction } from '@solana-program/system';
+import {
+  AccountState,
+  fetchToken,
+  getCreateAssociatedTokenIdempotentInstructionAsync,
+  getInitializeAccount3Instruction,
+  getTokenSize,
+  getTransferCheckedWithTransferHookInstructionAsync,
+  TOKEN_2022_PROGRAM_ADDRESS,
+} from '@solana-program/token-2022';
 import {
   CACHAIN_ERROR__ALREADY_THAWED,
+  CACHAIN_ERROR__MUTABLE_OWNER,
   CACHAIN_ERROR__ATTESTATION_EXPIRED,
   CACHAIN_ERROR__ATTESTATION_WRONG_CREDENTIAL,
   CACHAIN_ERROR__NOT_ELIGIBLE,
@@ -93,6 +104,34 @@ describe('eligibility gate', () => {
       credential: world.asset.data.schema,
     });
     await expectCode(world.send([ix]), CACHAIN_ERROR__ATTESTATION_WRONG_CREDENTIAL);
+  });
+
+  it('refuses to thaw an account whose owner could later be reassigned', async () => {
+    const { world } = ctx;
+    // A plain (non-associated) Token-2022 account has no ImmutableOwner extension. If the gate
+    // thawed it, Ana could hand the thawed account to Eve with SetAuthority.
+    const account = await generateKeyPairSigner();
+    const space = getTokenSize([{ __kind: 'TransferHookAccount', transferring: false }]);
+    await world.send([
+      getCreateAccountInstruction({
+        payer: world.client.payer,
+        newAccount: account,
+        lamports: await world.client.getMinimumBalance(space),
+        space,
+        programAddress: TOKEN_2022_PROGRAM_ADDRESS,
+      }),
+      getInitializeAccount3Instruction({ account: account.address, mint: world.asset.data.ownershipMint, owner: world.keys.ana.address }),
+    ]);
+    const ana = await holderAccounts(world.asset, world.keys.ana.address);
+    const ix = await getThawHolderInstructionAsync({
+      asset: world.asset.address,
+      owner: world.keys.ana.address,
+      mint: world.asset.data.ownershipMint,
+      tokenAccount: account.address,
+      attestation: ana.attestation,
+      credential: world.asset.data.credential,
+    });
+    await expectCode(world.send([ix]), CACHAIN_ERROR__MUTABLE_OWNER);
   });
 
   it('refuses to thaw twice', async () => {

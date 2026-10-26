@@ -1,0 +1,28 @@
+# Secrets and keys — never commit
+.env
+.env.*
+!.env.example
+*-keypair.json
+*.pem
+*.p12
+id.json
+
+# Member and deal-room material — never commit
+/private/
+/deal-room/
+
+# Rust / Anchor
+target/
+.anchor/
+test-ledger/
+
+# Node
+node_modules/
+dist/
+.next/
+*.tsbuildinfo
+
+# OS and editors
+.DS_Store
+.idea/
+.vscode/

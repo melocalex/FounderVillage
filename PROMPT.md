@@ -334,3 +334,98 @@ Whatever is built here meets §10 in full; the offering being real raises the ba
 5. `docs/DECISIONS.md` records every answer to §11.3, each with its source and date.
 
 When time runs out: a correct, smaller mechanism beats a larger one; an enforced whitelist beats an extra feature; an honest scope beats a bigger claim. Never let demo pressure move a control off-chain.
+
+## 12. Two frontends: the test harness you build, and the handoff
+
+You build a deliberately small test frontend. Someone else builds the real one, and they will almost certainly drive it with their own coding agent. Both of those facts shape what you produce.
+
+### 12.1 The test frontend you build
+
+Its only job is to prove the program works and to give the production developer something running to look at. It is a harness, not a product.
+
+- One page, one column, no design system, no component library, no state manager. Plain React with the Codama client. Tailwind only if the repo already has it.
+- Every instruction in the demo path gets a button: connect wallet, check eligibility, fund a bounty, submit and accept a delivery, record an inflow, claim a distribution.
+- Show the raw truth next to every action: the account addresses involved, the instruction name, the signature with an explorer link, and the decoded account state before and after. The production frontend will hide all of this; your harness exists to make it visible.
+- Show failures as loudly as successes. A rejected transaction prints its program error name, its code and its message. This is how the production developer learns the error surface.
+- Do not build: auth, onboarding, responsive layouts, empty states, loading skeletons, copy, branding, or anything resembling a funnel. If you catch yourself designing, stop and go back to the program.
+
+### 12.2 The handoff, written for their agent
+
+Assume the production frontend is built by a developer working with an agent that reads the repository before it writes anything. Optimize for that reader. The test is blunt: **an agent clones the repo, reads one file, runs one command, and can make a transaction succeed without asking a human anything.**
+
+Produce these, and keep them true:
+
+- **`AGENTS.md` at the repo root**, because the common agent harnesses load it automatically. It states what the system is in five lines, the one command to run, where the generated client lives, the program IDs per cluster, the list of instructions with their required accounts and signers, the error table, and the three rules that are not negotiable: use the generated client rather than hand-encoding, never put a keypair in the frontend, and treat eligibility as something the chain decides rather than something the UI decides.
+- **One command.** `npm run dev` boots the local validator, deploys both programs, seeds fixtures and starts the harness. Not a sequence of commands in a list. One. If it needs three things to happen, the script does all three.
+- **Seeded fixtures with their addresses printed on startup**, so there is immediately something to render: an eligible wallet, an ineligible wallet, an asset with its mint, two open bounties, one funded position, one claimable distribution. Deterministic keypairs from a committed seed file, never freshly generated, so the addresses in the documentation stay correct.
+- **The generated client, committed.** The production frontend imports typed functions and never builds an instruction by hand. Publish it to a private package only if that is already the house pattern; otherwise a path import from the repo is simpler and harder to get wrong.
+- **An error table**, mapping each program error code and name to what actually went wrong and what the UI should say. Without it, every failure reaches the user as a base58 blob.
+- **A read-only data guide**: for each screen the production frontend will need, which accounts to fetch and which fields to show. Account fetching is where a frontend agent wastes the most time guessing.
+- **`.env.example` carrying names and never values**, with a line for each variable saying what it is and where to get it.
+
+Hold the handoff to one file plus the generated client plus the seed script. If it grows past that, the production developer will not read it and neither will their agent.
+
+## 13. Testing, and getting tokens to test with
+
+### 13.1 The model
+
+Four layers, each answering a question the one below it cannot.
+
+1. **Unit, in Mollusk or LiteSVM.** One instruction, in process, no validator, milliseconds. Every instruction gets its success path and one test per distinct error code. This is where the bulk of the suite lives and where a change gets its feedback.
+2. **Integration, in Surfpool against a mainnet fork.** The whole loop, with Token ACL, the Attestation Service and Squads as the real deployed programs rather than mocks. This is the only layer that proves the composition works, because the bugs that matter live between your program and theirs. Use cheatcodes to move time and to set up state instead of long setup transactions.
+3. **Devnet smoke, before any demo or release.** Deploy, run one happy path per instruction, confirm the explorer shows what you expect. Slow and occasionally flaky by nature, so never gate a pull request on it.
+4. **Mainnet, read-only until the day it is not.** Fetch and simulate against real state before the first write ever happens.
+
+Two rules that keep the suite honest. A rejection test asserts the specific error, never merely that something threw, because a test that passes on the wrong error is worse than no test. And attacker setups use only what an attacker can actually produce: if the test needs an admin signature or a cheatcode to construct the attack, it is not demonstrating an attack.
+
+### 13.2 Getting devnet SOL, simply
+
+Devnet SOL is free and worthless. The faucet is rate limited per address and per IP, which is the only thing that ever goes wrong here.
+
+```bash
+solana config set --url devnet
+solana-keygen new --outfile ~/.config/solana/devnet.json   # if you need a fresh one
+solana airdrop 2
+solana balance
+```
+
+If the airdrop is rate limited, use `faucet.solana.com` in a browser with the same address, or wait and retry; do not loop on it. In tests, never call the faucet at all: Surfpool and LiteSVM mint SOL locally and instantly, which is faster and cannot be throttled.
+
+For devnet USDC, do not hunt for a faucet. Create your own mint, since nothing on devnet is real:
+
+```bash
+spl-token create-token --decimals 6 --program-id TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb
+spl-token create-account <MINT>
+spl-token mint <MINT> 100000
+```
+
+Put that mint address in the config account as the contribution token. On mainnet it becomes the real USDC mint, which is the only line that changes. Write the mint as configuration from the start so that swap is one value and not a code change.
+
+## 14. What it costs to go live on mainnet
+
+Quote costs in SOL, never in fiat, because the SOL price moves and a number in dollars rots. State the price you converted at and the date, or give the reader the multiplication.
+
+**The formula**, which is the only thing worth memorizing: `minimum_balance = (128 + data_size_in_bytes) × lamports_per_byte`. Mainnet currently charges **5080 lamports per byte**, reduced from 6960 under SIMD-0437, which schedules further steps to 6333, 5080, 2575, 1322 and finally 696. A safeguard, SIMD-0438, can reset it to 6960. So costs here are a ceiling that is more likely to fall than rise, and the live number comes from `getMinimumBalanceForRentExemption` rather than from this document.
+
+Rent is a **refundable bond, not a fee**. Close the account or the program and the lamports come back. That reframes the whole table below: it is capital you immobilize, not money you spend.
+
+| Item | Size | Cost at 5080 |
+|---|---|---|
+| Program, per 100 KB of binary | 102,400 B | ~0.52 SOL |
+| Core program, if ~300 KB | 307,200 B | ~1.56 SOL |
+| Gate program, if ~80 KB | 81,920 B | ~0.42 SOL |
+| `AssetConfig` PDA | ~500 B | ~0.0032 SOL |
+| Token-2022 mint with extensions | ~400 B | ~0.0027 SOL |
+| Token account with extensions | ~250 B | ~0.0019 SOL |
+| `Bounty` PDA | ~300 B | ~0.0022 SOL |
+| `Contribution` PDA | ~150 B | ~0.0014 SOL |
+| `DistributionClaim` PDA | ~80 B | ~0.0011 SOL |
+| Transaction fee | per signature | 0.000005 SOL |
+
+Which totals roughly: **two programs at about 2 SOL**, asset setup under 0.05 SOL, and about **0.0044 SOL per holder** across their token account, contribution record and claim record, so two hundred holders costs under 1 SOL. Call the one-time on-chain cost **3 to 5 SOL** including working capital, nearly all of it recoverable.
+
+Two cautions on the program line. Binary size is the one input you cannot know before building, so measure it with `ls -l target/deploy/*.so` and recompute rather than trusting the estimate above. And upgrading to a larger binary requires `solana program extend`, which has a 10 KiB minimum per call, so leave headroom at first deployment instead of paying to extend repeatedly.
+
+**Recurring costs are not rent.** A production RPC endpoint is the real monthly line: the public endpoints are rate limited and unsuitable for an application, and paid plans from Helius, Triton or QuickNode start in the tens of dollars a month and scale with request volume. Priority fees are negligible at this transaction volume. An indexer or monitoring, if used, is additive.
+
+**And the number that dwarfs every line above:** a security audit. This program will hold other people's money under a real offering, so shipping it unaudited is not a cost saving, it is an unpriced risk transfer onto the members. Audits of a Solana program of this size run into the tens of thousands of dollars and take weeks, and the firms worth asking are the ones whose findings you have already read. Get quotes early, because the lead time is longer than the build. When presenting a cost to go live, put the audit on the same page as the rent, or the figure is not an estimate, it is a decoration.

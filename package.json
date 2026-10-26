@@ -1,0 +1,58 @@
+{
+  "name": "cachain",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Founder Village assets on Solana: eligibility gate, bounties, contributions and pull distributions",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20.18"
+  },
+  "scripts": {
+    "dev": "tsx scripts/dev.ts",
+    "build:program": "NO_DNA=1 anchor build",
+    "codama": "tsx scripts/codama.ts",
+    "codama:check": "tsx scripts/codama.ts && git diff --exit-code -- clients/ts/src/generated",
+    "fixtures:programs": "tsx scripts/dump-programs.ts",
+    "test": "vitest run",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p app/tsconfig.json",
+    "app": "vite --config app/vite.config.ts"
+  },
+  "dependencies": {
+    "@solana-program/system": "0.16.0",
+    "@solana-program/token": "0.18.0",
+    "@solana-program/token-2022": "0.20.0",
+    "@solana/attestation": "2.1.0",
+    "@solana/kit": "8.5.0",
+    "@solana/kit-plugin-instruction-plan": "0.19.0",
+    "@solana/kit-plugin-rpc": "0.22.0",
+    "@solana/kit-plugin-signer": "0.19.0",
+    "@solana/kit-plugin-wallet": "0.22.0",
+    "@solana/react": "8.5.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@codama/nodes-from-anchor": "1.5.6",
+    "@codama/renderers-js": "2.8.0",
+    "@solana/kit-plugin-litesvm": "0.22.0",
+    "@solana/surfpool": "1.6.1",
+    "@types/node": "26.6.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.2",
+    "codama": "1.11.0",
+    "litesvm": "1.6.1",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vite": "8.3.5",
+    "vitest": "5.0.5"
+  },
+  "overrides": {
+    "@solana/surfpool": {
+      "@solana/kit-plugin-rpc": "$@solana/kit-plugin-rpc",
+      "@solana/kit-plugin-signer": "$@solana/kit-plugin-signer"
+    }
+  }
+}

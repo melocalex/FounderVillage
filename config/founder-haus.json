@@ -1,0 +1,19 @@
+{
+  "$comment": "Policy numbers for asset 01. The program holds none of these as literals: they are written into the Asset and Bounty accounts once, from this file. USDC amounts are whole units; scripts scale by 10^6.",
+  "assetId": 1,
+  "holdingBps": 2000,
+  "decimals": 6,
+  "credentialName": "founder-village",
+  "ownership": { "name": "Founder Haus Ownership", "symbol": "FHO", "uri": "" },
+  "profit": { "name": "Founder Haus Profit", "symbol": "FHP", "uri": "" },
+  "price": { "tokensPerUsdcNum": 1, "tokensPerUsdcDen": 1 },
+  "tranches": [
+    { "title": "Tranche 2: founding members", "targetUsdc": 300000, "deadline": null, "open": true },
+    { "title": "Tranche 3: founders in residence", "targetUsdc": 1200000, "deadline": "2029-02-11T00:00:00Z", "open": false },
+    { "title": "Tranche 4: founders in residence", "targetUsdc": 1470000, "deadline": "2031-02-11T00:00:00Z", "open": false }
+  ],
+  "workBounties": [
+    { "title": "Rooftop shade structure: design and build", "rewardTokens": 2500 },
+    { "title": "SPE deed transfer checklist", "rewardTokens": 800 }
+  ]
+}

@@ -27,6 +27,7 @@ import {
   getThawHolderInstructionAsync,
   holderAccounts,
   joinInstructions,
+  revokeAndFreezeInstructions,
   revokeInstruction,
 } from '../clients/ts/src';
 import { USDC } from '../scripts/world';
@@ -188,6 +189,16 @@ describe('eligibility gate', () => {
     setTime(expiry + 1n);
     await expectCode(contribute(world, bounty, world.keys.bruno, 10n * USDC), CACHAIN_ERROR__ATTESTATION_EXPIRED);
     await world.client.sendTransaction(await freezeInstructions(world.asset, world.keys.bruno.address));
+  });
+
+  it('revokes and freezes in one transaction, leaving no window to move tokens', async () => {
+    const { world } = ctx;
+    await world.send(
+      await revokeAndFreezeInstructions(world.asset, world.client.payer, world.keys.issuer, world.keys.ana.address),
+    );
+    const ana = await holderAccounts(world.asset, world.keys.ana.address);
+    expect((await fetchToken(world.client.rpc, ana.ownership)).data.state).toBe(AccountState.Frozen);
+    expect((await fetchToken(world.client.rpc, ana.profit)).data.state).toBe(AccountState.Frozen);
   });
 
   it('rejects the transfer hook when called outside a transfer', async () => {

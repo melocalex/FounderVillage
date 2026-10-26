@@ -72,7 +72,9 @@
     <text x="470" y="356" fill="#FFB86B" text-anchor="end">resume</text>
     <text x="940" y="383" fill="#FFB86B" text-anchor="middle">close_funding (from Open or Paused)</text>
     <text x="40" y="330" fill="#FFB86B">cancel</text>
-    <text x="40" y="346" fill="#6E78A8">no capital raised</text>
+    <text x="40" y="346" fill="#6E78A8">no capital raised;</text>
+    <text x="40" y="362" fill="#6E78A8">also frees a Claimed</text>
+    <text x="40" y="378" fill="#6E78A8">work bounty</text>
   </g>
 
   <!-- legend -->

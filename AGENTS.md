@@ -64,12 +64,12 @@ second approves, any member executes).
 | `freeze_holder` | anyone | freezes a holder whose attestation is gone or expired |
 | `propose_bounty` | eligible member | names a gap: kind, title, spec hash |
 | `curate_bounty` | council | writes the terms, once |
-| `open_bounty`, `pause_bounty`, `resume_bounty`, `close_funding`, `cancel_bounty` | council | state transitions |
+| `open_bounty`, `pause_bounty`, `resume_bounty`, `close_funding`, `cancel_bounty` | council | state transitions (`cancel_bounty` also frees a claimed, undelivered work bounty) |
 | `contribute` | eligible member | USDC into the capital vault; mints ownership + profit and the holding share |
 | `claim_bounty`, `submit_delivery` | eligible member (the claimant) | work bounty |
 | `accept_delivery`, `reject_delivery` | council | work bounty |
 | `settle_work` | anyone | mints the curated reward to the claimant |
-| `record_inflow` | payer of the rent | USDC into the income vault; raises every profit holder's claim |
+| `record_inflow` | payer of the rent | USDC into the income vault; raises every profit holder's claim (refused before the first issuance) |
 | `record_outflow` | council | capital to the pinned SPE treasury |
 | `claim_distribution` | eligible holder | pays accrued income |
 | `execute` | Token-2022 only | transfer hook of the profit mint; never call it |
@@ -78,6 +78,10 @@ A member needs `joinInstructions(rpc, asset, wallet, payer)` once: it creates bo
 accounts, opens the position and thaws both accounts. Profit-token transfers need the hook's extra
 accounts: build them with `getTransferCheckedWithTransferHookInstructionAsync` from
 `@solana-program/token-2022`.
+
+Eligibility is enforced at thaw and freeze, not on every transfer. To remove someone, the issuer
+sends `revokeAndFreezeInstructions(asset, payer, issuer, wallet)`: revocation and both freezes in
+one transaction.
 
 ## Errors
 
@@ -127,6 +131,7 @@ extracts the code from any Kit error; `describeError(code)` names it.
 | 6038 | MathOverflow | Amount out of range. |
 | 6039 | NotTransferring | (never shown: hook misuse) |
 | 6040 | MutableOwner | Use your associated token account. |
+| 6041 | NoHolders | Income can be recorded only after the first tokens are issued. |
 | 17 | Token-2022 AccountFrozen | The recipient is not a verified member. |
 | 2000–2999 | Anchor constraint errors | A wrong account was passed (client bug). |
 | 6004–6010 from SQDS4… | Squads errors | e.g. 6008 InvalidProposalStatus: the proposal needs more approvals. |

@@ -23,18 +23,30 @@ import {
 export type Distribution = {
   /** Cumulative income per profit-token base unit, scaled by `math::INDEX_SCALE`. */
   rewardIndex: bigint;
-  /** Sum of every `Position::balance`. Equals profit supply minus burned tokens. */
+  /**
+   * Sum of every `Position::balance`: every profit token ever minted. Burns skip the hook,
+   * so a burned token keeps its income share with the burner; nobody else's share shrinks.
+   */
   trackedSupply: bigint;
-  /** Income recorded while `tracked_supply` was zero, folded into the next inflow. */
+  /**
+   * Recorded income the index could not yet represent, in index units (amount scaled by
+   * `math::INDEX_SCALE`). Always below `tracked_supply`; folded into the next inflow.
+   */
   carry: bigint;
 };
 
 export type DistributionArgs = {
   /** Cumulative income per profit-token base unit, scaled by `math::INDEX_SCALE`. */
   rewardIndex: number | bigint;
-  /** Sum of every `Position::balance`. Equals profit supply minus burned tokens. */
+  /**
+   * Sum of every `Position::balance`: every profit token ever minted. Burns skip the hook,
+   * so a burned token keeps its income share with the burner; nobody else's share shrinks.
+   */
   trackedSupply: number | bigint;
-  /** Income recorded while `tracked_supply` was zero, folded into the next inflow. */
+  /**
+   * Recorded income the index could not yet represent, in index units (amount scaled by
+   * `math::INDEX_SCALE`). Always below `tracked_supply`; folded into the next inflow.
+   */
   carry: number | bigint;
 };
 

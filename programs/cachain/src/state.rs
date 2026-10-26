@@ -96,7 +96,8 @@ pub struct Distribution {
     /// Sum of every `Position::balance`: every profit token ever minted. Burns skip the hook,
     /// so a burned token keeps its income share with the burner; nobody else's share shrinks.
     pub tracked_supply: u64,
-    /// Income recorded while `tracked_supply` was zero, folded into the next inflow.
+    /// Recorded income the index could not yet represent, in index units (amount scaled by
+    /// `math::INDEX_SCALE`). Always below `tracked_supply`; folded into the next inflow.
     pub carry: u64,
 }
 

@@ -31,13 +31,20 @@ pub fn holding_share(member_tokens: u64, holding_bps: u16) -> Result<u64> {
     u64::try_from(share).map_err(|_| error!(CachainError::MathOverflow))
 }
 
-/// Index increase from distributing `amount` over `supply` tracked profit tokens.
-pub fn index_increment(amount: u64, supply: u64) -> Result<u128> {
-    require!(supply > 0, CachainError::MathOverflow);
-    Ok(u128::from(amount)
+/// Spreads `amount` (plus the `carry` left by earlier inflows, already in index units) over
+/// `supply` tracked profit tokens. Returns the index step and the new carry. The carry is what
+/// the step could not represent, kept in index units so nothing is promised twice:
+/// `amount * INDEX_SCALE + carry == step * supply + new_carry`, and `new_carry < supply`.
+pub fn spread(amount: u64, carry: u64, supply: u64) -> Result<(u128, u64)> {
+    require!(supply > 0, CachainError::NoHolders);
+    let scaled = u128::from(amount)
         .checked_mul(INDEX_SCALE)
         .ok_or(CachainError::MathOverflow)?
-        / u128::from(supply))
+        .checked_add(u128::from(carry))
+        .ok_or(CachainError::MathOverflow)?;
+    let supply = u128::from(supply);
+    let carry = u64::try_from(scaled % supply).map_err(|_| error!(CachainError::MathOverflow))?;
+    Ok((scaled / supply, carry))
 }
 
 /// Income earned by `balance` tokens while the index moved from `from` to `to`.
@@ -63,6 +70,26 @@ mod tests {
         assert!(holding_share(1, 10_000).is_err());
     }
 
+    /// Regression: ten one-unit inflows over 10,000 / 5,000 / 3,750 tokens once promised 18
+    /// units for 10 recorded, because the remainder was carried in whole units.
+    #[test]
+    fn tiny_inflows_promise_no_more_than_recorded() {
+        let balances = [10_000_000_000u64, 5_000_000_000, 3_750_000_000];
+        let supply = balances.iter().sum();
+        let (mut index, mut carry) = (0u128, 0u64);
+        for _ in 0..10 {
+            let (step, next) = spread(1, carry, supply).unwrap();
+            index += step;
+            carry = next;
+        }
+        let paid: u64 = balances
+            .iter()
+            .map(|b| accrued(*b, 0, index).unwrap())
+            .sum();
+        assert!(paid <= 10);
+        assert!(spread(1, 0, 0).is_err());
+    }
+
     #[test]
     fn price_rounds_down() {
         assert_eq!(tokens_for(10, 1, 3).unwrap(), 3);
@@ -83,19 +110,26 @@ mod tests {
             prop_assert!(exact - actual < u128::from(BPS_DENOMINATOR));
         }
 
-        /// Splitting an inflow across holders never pays out more than the inflow.
+        /// Any sequence of inflows, however small, never promises holders more than came in,
+        /// and the carry accounts for every unit that has not been promised yet.
         #[test]
-        fn distribution_never_exceeds_inflow(
+        fn distribution_never_exceeds_inflows(
             balances in proptest::collection::vec(1u64..1_000_000_000_000, 1..20),
-            amount in 0u64..1_000_000_000_000_000,
+            amounts in proptest::collection::vec(0u64..1_000_000_000_000, 1..40),
         ) {
             let supply: u64 = balances.iter().sum();
-            let index = index_increment(amount, supply).unwrap();
-            let paid: u128 = balances
-                .iter()
-                .map(|b| u128::from(accrued(*b, 0, index).unwrap()))
-                .sum();
-            prop_assert!(paid <= u128::from(amount));
+            let (mut index, mut carry) = (0u128, 0u64);
+            for amount in &amounts {
+                let (step, next) = spread(*amount, carry, supply).unwrap();
+                prop_assert!(u128::from(*amount) * INDEX_SCALE + u128::from(carry)
+                    == step * u128::from(supply) + u128::from(next));
+                prop_assert!(next < supply);
+                index += step;
+                carry = next;
+            }
+            let paid: u128 = balances.iter().map(|b| u128::from(accrued(*b, 0, index).unwrap())).sum();
+            let total: u128 = amounts.iter().map(|a| u128::from(*a)).sum();
+            prop_assert!(paid <= total);
         }
 
         /// Accruing in two steps never pays more than accruing once.

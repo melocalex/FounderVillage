@@ -84,4 +84,6 @@ pub enum CachainError {
     NotTransferring,
     #[msg("Token account owner can be reassigned; use an associated token account")]
     MutableOwner,
+    #[msg("Nobody holds profit tokens yet; record income after the first issuance")]
+    NoHolders,
 }

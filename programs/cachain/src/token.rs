@@ -365,29 +365,20 @@ impl Asset {
         Ok(())
     }
 
-    /// Spreads an inflow over current profit holders. With no holders yet it is carried
-    /// into the next inflow, so no income is stranded.
+    /// Spreads an inflow over current profit holders. Refused while nobody holds profit
+    /// tokens, because the first minter would otherwise collect income recorded before them.
     pub fn distribute(&mut self, amount: u64) -> Result<()> {
-        let total = amount
-            .checked_add(self.distribution.carry)
-            .ok_or(CachainError::MathOverflow)?;
-        if self.distribution.tracked_supply == 0 {
-            self.distribution.carry = total;
-            return Ok(());
-        }
-        let supply = self.distribution.tracked_supply;
-        let step = crate::math::index_increment(total, supply)?;
-        // What the index step actually promises holders; the rounding remainder waits for the
-        // next inflow instead of being stranded in the vault.
-        let promised = crate::math::accrued(supply, 0, step)?;
+        let (step, carry) = crate::math::spread(
+            amount,
+            self.distribution.carry,
+            self.distribution.tracked_supply,
+        )?;
         self.distribution.reward_index = self
             .distribution
             .reward_index
             .checked_add(step)
             .ok_or(CachainError::MathOverflow)?;
-        self.distribution.carry = total
-            .checked_sub(promised)
-            .ok_or(CachainError::MathOverflow)?;
+        self.distribution.carry = carry;
         Ok(())
     }
 }

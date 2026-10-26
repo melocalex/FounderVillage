@@ -97,6 +97,8 @@ export const CACHAIN_ERROR__MATH_OVERFLOW = 0x1796; // 6038
 export const CACHAIN_ERROR__NOT_TRANSFERRING = 0x1797; // 6039
 /** MutableOwner: Token account owner can be reassigned; use an associated token account */
 export const CACHAIN_ERROR__MUTABLE_OWNER = 0x1798; // 6040
+/** NoHolders: Nobody holds profit tokens yet; record income after the first issuance */
+export const CACHAIN_ERROR__NO_HOLDERS = 0x1799; // 6041
 
 export type CachainError =
   | typeof CACHAIN_ERROR__ALREADY_FROZEN
@@ -125,6 +127,7 @@ export type CachainError =
   | typeof CACHAIN_ERROR__MATH_OVERFLOW
   | typeof CACHAIN_ERROR__METADATA_TOO_LONG
   | typeof CACHAIN_ERROR__MUTABLE_OWNER
+  | typeof CACHAIN_ERROR__NO_HOLDERS
   | typeof CACHAIN_ERROR__NOT_CLAIMANT
   | typeof CACHAIN_ERROR__NOT_COUNCIL
   | typeof CACHAIN_ERROR__NOT_ELIGIBLE
@@ -170,6 +173,7 @@ if (process.env['NODE_ENV'] !== 'production') {
     [CACHAIN_ERROR__MATH_OVERFLOW]: `Arithmetic overflow`,
     [CACHAIN_ERROR__METADATA_TOO_LONG]: `Name, symbol or URI is too long`,
     [CACHAIN_ERROR__MUTABLE_OWNER]: `Token account owner can be reassigned; use an associated token account`,
+    [CACHAIN_ERROR__NO_HOLDERS]: `Nobody holds profit tokens yet; record income after the first issuance`,
     [CACHAIN_ERROR__NOT_CLAIMANT]: `Only the member who claimed the bounty may deliver it`,
     [CACHAIN_ERROR__NOT_COUNCIL]: `Only the asset council may perform this action`,
     [CACHAIN_ERROR__NOT_ELIGIBLE]: `Holder has no valid attestation`,

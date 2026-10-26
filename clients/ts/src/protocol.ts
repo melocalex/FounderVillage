@@ -20,6 +20,7 @@ import {
   TOKEN_2022_PROGRAM_ADDRESS,
 } from '@solana-program/token-2022';
 import { findAttestationPda } from '@solana/attestation';
+import { revokeInstruction } from './attestations';
 import {
   CACHAIN_PROGRAM_ADDRESS,
   fetchAsset,
@@ -163,6 +164,22 @@ export async function freezeInstructions(asset: LoadedAsset, owner: Address): Pr
       }),
     ),
   );
+}
+
+/**
+ * Revokes a holder's attestation and freezes both of their accounts in one transaction, so
+ * there is no moment in which a revoked holder can still move tokens. Signed by the issuer.
+ */
+export async function revokeAndFreezeInstructions(
+  asset: LoadedAsset,
+  payer: TransactionSigner,
+  issuer: TransactionSigner,
+  owner: Address,
+): Promise<Instruction[]> {
+  return [
+    await revokeInstruction(payer, issuer, asset.data.credential, asset.data.schema, owner),
+    ...(await freezeInstructions(asset, owner)),
+  ];
 }
 
 export async function proposeInstruction(

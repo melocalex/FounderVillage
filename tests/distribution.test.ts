@@ -3,6 +3,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { getTransferCheckedWithTransferHookInstructionAsync } from '@solana-program/token-2022';
 import {
+  CACHAIN_ERROR__NO_HOLDERS,
   CACHAIN_ERROR__NOT_ELIGIBLE,
   CACHAIN_ERROR__NOTHING_TO_CLAIM,
   claimDistributionInstruction,
@@ -109,15 +110,31 @@ describe('distributions', () => {
     await world.send([await claimDistributionInstruction(world.asset, world.keys.bruno)]);
   });
 
+  it('never promises more than recorded, even from many tiny inflows (regression)', async () => {
+    const { world } = ctx;
+    for (let i = 0; i < 10; i++) await recordInflow(world, 1n);
+    // Before the fix the last of these claims reverted, because earlier ones had been overpaid.
+    for (const who of ['ana', 'bruno', 'holding'] as const) {
+      if ((await accrued(who)) > 0n) await world.send([await claimDistributionInstruction(world.asset, world.keys[who])]);
+      expect(await accrued(who)).toBe(0n);
+    }
+  });
+
   it('never pays out more than was recorded', async () => {
     const { world } = ctx;
-    await world.send([await claimDistributionInstruction(world.asset, world.keys.holding)]);
-    await world.send([await claimDistributionInstruction(world.asset, world.keys.ana)]);
+    // Every holder has claimed everything they were owed.
     const l = (await ledger(world)).ledger;
-    expect(l.income).toBe(3n * 1_875n * USDC);
+    expect(l.income).toBe(3n * 1_875n * USDC + 10n);
     expect(l.incomeClaimed <= l.income).toBe(true);
-    // Everything recorded so far divides exactly, so everything was paid.
-    expect(l.incomeClaimed).toBe(l.income);
-    expect(await usdcBalance(world, world.asset.data.incomeVault)).toBe(0n);
+    // Only the ten one-unit inflows leave dust behind, held as carry for the next inflow.
+    expect(l.income - l.incomeClaimed <= 10n).toBe(true);
+    expect(await usdcBalance(world, world.asset.data.incomeVault)).toBe(l.income - l.incomeClaimed);
+  });
+});
+
+describe('distributions before anyone holds', () => {
+  it('refuses income while nobody holds profit tokens, so the first minter cannot take it', async () => {
+    const { world } = await litesvmWorld();
+    await expectCode(recordInflow(world, 1_000n * USDC), CACHAIN_ERROR__NO_HOLDERS);
   });
 });

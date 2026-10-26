@@ -3,7 +3,7 @@
 //! Proposed → Curated → Open ─┬─ (work)      → Claimed → Delivered ─┬→ Accepted → Settled
 //!     │          │       │   │                                     └→ Rejected
 //!     │          │       │   └─ (financial) ⇄ Paused; Open|Paused → Settled (close_funding)
-//!     └──────────┴───────┴→ Cancelled (no capital raised)
+//!     └──────────┴───────┴─ (and Claimed) → Cancelled (no capital raised)
 //!
 //! Curation, opening, pausing, closing, acceptance and rejection need the council signature,
 //! and the council is a Squads vault, so no single key can perform them.
@@ -192,6 +192,8 @@ pub fn close_funding(ctx: Context<CouncilBounty>) -> Result<()> {
     Ok(())
 }
 
+/// Cancels a bounty that has raised nothing. A claimed work bounty can be cancelled too, so a
+/// claimant who never delivers cannot hold it forever; a delivered one waits for a decision.
 pub fn cancel_bounty(ctx: Context<CouncilBounty>) -> Result<()> {
     let bounty = &mut ctx.accounts.bounty;
     require!(bounty.raised == 0, CachainError::FundsRaised);
@@ -201,6 +203,7 @@ pub fn cancel_bounty(ctx: Context<CouncilBounty>) -> Result<()> {
             BountyState::Proposed,
             BountyState::Curated,
             BountyState::Open,
+            BountyState::Claimed,
         ],
         BountyState::Cancelled,
     )?;

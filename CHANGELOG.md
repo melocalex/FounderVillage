@@ -16,4 +16,9 @@ First working version, on localnet.
   in every account.
 - `npm run dev`: offline Surfpool with the mainnet SAS and Squads binaries, seeded fixtures, and the
   test harness.
-- 38 LiteSVM tests, a Surfpool end-to-end test, Rust property tests, and CI with pinned actions.
+- Fixes from an independent review: the distribution remainder is carried in index units, so tiny
+  inflows can no longer promise more than they bring; income cannot be recorded before the first
+  issuance; the council can free a claimed, undelivered work bounty.
+- `revokeAndFreezeInstructions`: revocation and both freezes in one transaction.
+- 42 LiteSVM tests, a Surfpool end-to-end test, 6 Rust unit and property tests, and CI with pinned
+  actions.

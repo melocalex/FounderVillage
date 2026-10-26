@@ -17,6 +17,7 @@ import {
   fetchBounty,
   findBountyPda,
   getAcceptDeliveryInstructionAsync,
+  getCancelBountyInstructionAsync,
   getCurateBountyInstructionAsync,
   getRejectDeliveryInstructionAsync,
   getSubmitDeliveryInstructionAsync,
@@ -124,6 +125,16 @@ describe('work bounties', () => {
 
     // Settling twice is refused.
     await expectCode(world.send([await settleWorkInstruction(world.asset, bounty, world.keys.bruno.address)]), CACHAIN_ERROR__INVALID_BOUNTY_STATE);
+  });
+
+  it('lets the council cancel a claim that is never delivered', async () => {
+    const { world } = ctx;
+    const b = await openBounty(world, world.keys.ana, BountyKind.Work, 'Squatted gap', { reward: TOKEN });
+    await world.send([await claimBountyInstruction(world.asset, b, world.keys.bruno)]);
+    await world.asCouncil([
+      await getCancelBountyInstructionAsync({ council: councilSigner(world), asset: world.asset.address, bounty: b }),
+    ]);
+    expect((await fetchBounty(world.client.rpc, b)).data.state).toBe(BountyState.Cancelled);
   });
 
   it('mints nothing for a rejected delivery', async () => {

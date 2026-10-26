@@ -19,10 +19,11 @@
 </p>
 
 > [!IMPORTANT]
-> **Status: a working protocol on localnet.** 44 tests pass against the real mainnet binaries of
-> the Solana Attestation Service and Squads. Nothing is deployed to devnet or mainnet, and the
-> program has not been audited. This is software, not an offer: no token here is for sale, and
-> nothing in this repository describes a return.
+> **Status: a working protocol on localnet.** 49 tests pass, most of them against the real mainnet
+> binaries of the Solana Attestation Service and Squads, and an independent adversarial review's
+> findings are fixed. Nothing is deployed to devnet or mainnet, and the program has not had an
+> external audit. This is software, not an offer: no token here is for sale, and nothing in this
+> repository describes a return.
 
 ## Three promises, enforced by the program
 
@@ -113,9 +114,10 @@ illegal one reverts with `InvalidBountyState`, and the terms cannot change after
 
 <img src="assets/distribution.svg" alt="Reward index rises with each inflow; the transfer hook settles both sides of a transfer; holders claim accrued plus balance times the index rise" width="100%">
 
-A plain transfer into a vault changes no accounting: only `record_inflow` counts as rent. Claims
-round down, pay once, and can never exceed what was recorded; a test checks that the income vault
-empties exactly when every holder has claimed.
+A plain transfer into a vault changes no accounting: only `record_inflow` counts as rent, and it is
+refused until someone holds profit tokens. Claims round down, pay once, and can never exceed what
+was recorded; the part of an inflow the index cannot represent is carried, in index units, into the
+next one. A test checks that once every holder has claimed, the income vault holds only rounding dust.
 
 ## Who holds which key
 
@@ -155,9 +157,9 @@ Deploying to devnet needs a wallet you keep as upgrade authority. It is the next
 ## Tests
 
 ```bash
-npm test                 # 38 tests in LiteSVM, against the mainnet SAS and Squads binaries
+npm test                 # 42 tests in LiteSVM, against the mainnet SAS and Squads binaries
 npm run test:e2e         # the full path on an embedded Surfpool
-cargo test -p cachain    # property tests of the arithmetic
+cargo test -p cachain    # 6 unit and property tests of the arithmetic
 ```
 
 What they prove, among others: a non-whitelisted wallet cannot be thawed or receive the token; an
@@ -167,7 +169,13 @@ change after curation; one council key cannot curate, accept, pause or move capi
 refuses to execute below the threshold; the vault always equals contributions minus recorded
 outflows; the holding's share holds after mixed issuances; pause, resume, close and deadlines behave;
 the hook moves future income with the token and cannot be called outside a transfer; no holder can
-claim twice and payouts never exceed recorded income. Every rejection asserts its exact error code.
+claim twice and payouts never exceed recorded income, even across many tiny inflows; income cannot
+be recorded before anyone holds; a claimed work bounty that is never delivered can be freed; and a
+holder can be revoked and frozen in one transaction. Every rejection asserts its exact error code.
+
+Reviews so far: the Solana MCP static linter (clean), and an independent adversarial review whose
+two medium findings and one low finding are fixed with regression tests. See
+[docs/DECISIONS.md](docs/DECISIONS.md#reviews).
 
 CI runs `cargo fmt`, `clippy -D warnings`, the property tests, `anchor build`, the Codama drift check,
 `tsc`, `npm audit`, both test suites and the one-command bootstrap. Actions are pinned by commit SHA.

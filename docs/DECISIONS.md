@@ -20,7 +20,7 @@ Sources, in order of precedence: Alex in the build conversation; the asset page
 | D6 | **The asset PDA keeps the freeze authority and is the gate.** `thaw_holder` thaws attested holders; `freeze_holder` lets anyone re-freeze a revoked or expired one. | Token ACL research, 2026-10-26 | **Token ACL (sRFC-37)** now: deployed and audited, but it thaws once and has no re-freeze without a second gate program and a crank, and code changed after its audit. The irreversible part, `DefaultAccountState = Frozen` with a freeze authority set, is already right, so moving the freeze authority to a Token ACL `MintConfig` later is a program upgrade, not a new mint. **MPL-3643**: alpha, unaudited, no published program IDs. |
 | D7 | **The gate thaws only accounts with `ImmutableOwner`** (every associated token account has it). | Own review, 2026-10-26 | Thawing any token account: a thawed plain account could be handed to a non-whitelisted wallet with `SetAuthority`. Fixed before release. |
 | D8 | **Distribution is an on-chain accumulator.** `record_inflow` raises a reward index; the profit mint's transfer hook settles both sides of every transfer; holders pull with `claim_distribution`. | PROMPT §11.4, §11.5 lesson 3 | A Merkle root posted by the council (the council would state who the holders are); periodic snapshots (balances between snapshots are unknowable on-chain). |
-| D9 | **Burned profit tokens keep their income share with the burner.** Burns skip the hook, so the tracked supply counts every token minted. Nobody else's share shrinks. | Own analysis | Blocking burns (Token-2022 has no extension for it). |
+| D9 | **Burned profit tokens keep their income share with the burner.** Burns skip the hook, so the tracked supply counts every token minted. Nobody else's share shrinks. **Any future redemption must not be "holder burns tokens"**: it would pay the burner twice. | Own analysis; independent review F5 | Blocking burns (Token-2022 has no extension for it). |
 | D10 | **Claims require a live attestation.** A frozen holder keeps accruing and claims after reinstatement. Nothing is confiscated. | PROMPT §11.4 ("what losing eligibility does") | Paying ineligible holders (sanctions); dropping their accrual. |
 | D11 | **The holding's share is a split on each issuance**, `holding_bps` in the config (2,000 = 20%), rounded down so members are never shorted; a test asserts the ratio after mixed issuances. | Deck slide 16 ("keeps 20% of every tokenized asset") | Pre-minting at genesis: assets that start from nothing have no supply to pre-mint against. |
 | D12 | **Tranches are financial bounties.** Target, price and deadline are written once at curation. After a deadline contributions revert (`DeadlinePassed`). There are **no on-chain refunds**: a shortfall against a target is handled off-chain. Tranche 2 has no deadline because none is published. | Asset page (tranche schedule) | A deadline with an automatic on-chain consequence (refund or cancel): needs a decision from counsel first. |
@@ -33,6 +33,12 @@ Sources, in order of precedence: Alex in the build conversation; the asset page
 | D19 | **The local demo runs on an offline Surfpool** with the mainnet SAS and Squads binaries fetched read-only. | Determinism | A live mainnet fork: depends on the network and changes under you. |
 | D20 | **Contribution token on localnet is a local stand-in for USDC.** The mint is configuration; on mainnet it is USDC. | PROMPT §13.2 | Hunting for a devnet USDC faucet. |
 | D21 | **Asset address = PDA(`asset`, creator, asset id).** Anyone can create an asset; nobody can squat someone else's. | Own design | Global ids (squattable). |
+| D22 | **The distribution remainder is carried in index units** (`amount × 10^12 + carry = step × supply + new carry`), so no inflow promises more than it brought and nothing is stranded except per-holder rounding dust. | Independent review F1, 2026-10-26 | Carrying the remainder in whole USDC units (overpromised when inflows were tiny; found in review and fixed before release). |
+| D23 | **`record_inflow` is refused while nobody holds profit tokens** (`NoHolders`). | Independent review F2 | Carrying zero-supply income into the next inflow: the first minter would collect all of it. |
+| D24 | **Income is assigned when it is recorded, not time-weighted.** Someone who contributes just before a rent payment shares in it, as a share bought before a dividend date does; they paid the curated price for the tokens. | Independent review F2 | Time-weighted accrual (needs per-holder history the program does not keep). |
+| D25 | **The council can cancel a claimed work bounty**, so a claimant who never delivers cannot hold it forever. An accepted bounty waits for its claimant to be eligible again. | Independent review F3 | No exit from `Claimed`. |
+| D26 | **Eligibility is enforced at thaw and freeze, not on every transfer.** A revoked holder can move tokens to another eligible holder until someone freezes them, so revocation should always use `revokeAndFreezeInstructions` (revoke and freeze in one transaction), and a keeper can freeze any lapsed holder. The holding's own attestation must not expire, or anyone could freeze it and halt issuance. | PROMPT §11.4 ("transfers stay standard"); independent review F4 | Checking the receiver's attestation inside the profit hook (possible later; the ownership mint has no hook program). |
+| D27 | **The gate reads presence, issuer and expiry, not the attestation's contents.** The tier and the schema's pause flag do not gate. | Independent review F6 | Gating on tier: needs Founder Village to define tiers first. |
 
 ## Open
 
@@ -46,6 +52,15 @@ Sources, in order of precedence: Alex in the build conversation; the asset page
 | O6 | Is the NFT whitelist in the deck current, and does it replace or sit beside SAS attestations? | The program gates on SAS only. | SAS only. |
 | O7 | Who issues attestations in production, and from which key? | The credential's authorized signers decide who is eligible. | A demo issuer key; production should be a Squads vault or a dedicated, rotated issuer. |
 | O8 | A notice delay on council actions. | Homerun's "notice delay" existed in no code. Squads `time_lock` enforces one. | 0 on localnet. Set a real `time_lock` before devnet demos. |
+
+## Reviews
+
+- `program_autofixer` (Solana MCP) over every program file: no issues at any severity. The tool's
+  coverage of critical/high patterns is thin, so this is not counted as a review.
+- An independent adversarial review (entry-point table, the six scanner patterns, a manual walk,
+  LiteSVM reproductions against the real Token-2022 and SAS binaries) on 2026-10-26 found two
+  medium issues (F1, F2) and one low (F3), fixed with regression tests, and three trade-offs now
+  recorded as D9, D26 and D27.
 
 ## Not built yet (gaps, stated plainly)
 
